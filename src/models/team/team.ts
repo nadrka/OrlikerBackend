@@ -23,11 +23,14 @@ export class Team {
   @Column({ nullable: true })
   public imgURL: string;
 
+  @Column()
+  captainId: number;
+
   @OneToOne(type => Player)
-  @JoinColumn()
+  @JoinColumn({ name: "captainId" })
   captain: Player;
 
-  @OneToOne(type => League)
+  @OneToOne(type => League, { nullable: true })
   @JoinColumn()
   currentLegue: League;
 
@@ -45,7 +48,8 @@ export class Team {
       name: Joi.string()
         .min(3)
         .max(50)
-        .required()
+        .required(),
+      captainId: Joi.number().required()
     };
 
     return Joi.validate(team, schema);

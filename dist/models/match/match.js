@@ -17,13 +17,11 @@ const typeorm_1 = require("typeorm");
 const joi_1 = __importDefault(require("joi"));
 const matchResult_1 = __importDefault(require("./matchResult"));
 const team_1 = __importDefault(require("../team/team"));
+const league_1 = __importDefault(require("../league"));
 let Match = class Match {
-    static validateGenre(match) {
+    static validateMatch(match) {
         const schema = {
-            name: joi_1.default.string()
-                .min(3)
-                .max(50)
-                .required()
+            status: joi_1.default.string().equal(["Upcoming", "Played"])
         };
         return joi_1.default.validate(match, schema);
     }
@@ -54,7 +52,7 @@ __decorate([
     __metadata("design:type", matchResult_1.default)
 ], Match.prototype, "result", void 0);
 __decorate([
-    typeorm_1.OneToOne(type => user_1.User),
+    typeorm_1.OneToOne(type => user_1.User, { nullable: true }),
     typeorm_1.JoinColumn({}),
     __metadata("design:type", user_1.User)
 ], Match.prototype, "referee", void 0);
@@ -68,6 +66,11 @@ __decorate([
     typeorm_1.JoinColumn({}),
     __metadata("design:type", matchResult_1.default)
 ], Match.prototype, "awayTeam", void 0);
+__decorate([
+    typeorm_1.OneToOne(type => league_1.default),
+    typeorm_1.JoinColumn({}),
+    __metadata("design:type", league_1.default)
+], Match.prototype, "league", void 0);
 Match = __decorate([
     typeorm_1.Entity()
 ], Match);

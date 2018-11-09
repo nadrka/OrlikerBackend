@@ -17,13 +17,15 @@ const joi_1 = __importDefault(require("joi"));
 const player_1 = __importDefault(require("../player/player"));
 const playerTeamCarrer_1 = __importDefault(require("../player/playerTeamCarrer"));
 const teamParticipation_1 = __importDefault(require("./teamParticipation"));
+const league_1 = __importDefault(require("../league"));
 let Team = class Team {
     static validateTeam(team) {
         const schema = {
             name: joi_1.default.string()
                 .min(3)
                 .max(50)
-                .required()
+                .required(),
+            captainId: joi_1.default.number().required()
         };
         return joi_1.default.validate(team, schema);
     }
@@ -41,10 +43,19 @@ __decorate([
     __metadata("design:type", String)
 ], Team.prototype, "imgURL", void 0);
 __decorate([
+    typeorm_1.Column(),
+    __metadata("design:type", Number)
+], Team.prototype, "captainId", void 0);
+__decorate([
     typeorm_1.OneToOne(type => player_1.default),
-    typeorm_1.JoinColumn(),
+    typeorm_1.JoinColumn({ name: "captainId" }),
     __metadata("design:type", player_1.default)
 ], Team.prototype, "captain", void 0);
+__decorate([
+    typeorm_1.OneToOne(type => league_1.default, { nullable: true }),
+    typeorm_1.JoinColumn(),
+    __metadata("design:type", league_1.default)
+], Team.prototype, "currentLegue", void 0);
 __decorate([
     typeorm_1.OneToMany(type => playerTeamCarrer_1.default, carrer => carrer.team),
     __metadata("design:type", Array)

@@ -13,19 +13,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const team_1 = __importDefault(require("../models/team/team"));
-const playerService_1 = __importDefault(require("./playerService"));
 class TeamService {
     createTeam(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const playerService = new playerService_1.default();
             const { error } = team_1.default.validateTeam(req.body);
             if (error)
                 return res.status(400).send(error.details[0].message);
             const teamRepository = yield typeorm_1.getConnection().getRepository(team_1.default);
             const teamFromRequestBody = req.body;
             const team = yield teamRepository.create(teamFromRequestBody);
-            team.captain = yield playerService.getPlayerForUser(1);
             yield typeorm_1.getConnection().manager.save(team);
+            res.send(team);
         });
     }
     getTeamsForGivenLeague() {

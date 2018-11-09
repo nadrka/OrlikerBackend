@@ -9,6 +9,7 @@ import {
 import Joi from "joi";
 import MatchResult from "./matchResult";
 import Team from "../team/team";
+import League from "../league";
 
 @Entity()
 export class Match {
@@ -31,7 +32,7 @@ export class Match {
   @JoinColumn({})
   result: MatchResult;
 
-  @OneToOne(type => User)
+  @OneToOne(type => User, { nullable: true })
   @JoinColumn({})
   referee: User;
 
@@ -43,12 +44,13 @@ export class Match {
   @JoinColumn({})
   awayTeam: MatchResult;
 
-  static validateGenre(match: Match) {
+  @OneToOne(type => League)
+  @JoinColumn({})
+  league: League;
+
+  static validateMatch(match: Match) {
     const schema = {
-      name: Joi.string()
-        .min(3)
-        .max(50)
-        .required()
+      status: Joi.string().equal(["Upcoming", "Played"])
     };
 
     return Joi.validate(match, schema);

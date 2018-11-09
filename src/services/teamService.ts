@@ -4,7 +4,6 @@ import Team from "../models/team/team";
 import PlayerService from "./playerService";
 class TeamService {
   async createTeam(req: Request, res: Response) {
-    const playerService = new PlayerService();
     const { error } = Team.validateTeam(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -12,9 +11,8 @@ class TeamService {
     const teamFromRequestBody: DeepPartial<Team> = req.body;
     const team = await teamRepository.create(teamFromRequestBody);
 
-    team.captain = await playerService.getPlayerForUser(1);
-
     await getConnection().manager.save(team);
+    res.send(team);
   }
 
   async getTeamsForGivenLeague() {
