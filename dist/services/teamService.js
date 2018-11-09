@@ -31,6 +31,13 @@ class TeamService {
             const teamRepository = yield typeorm_1.getConnection().getRepository(team_1.default);
         });
     }
+    getAllTeams() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const teamRepository = yield typeorm_1.getConnection().getRepository(team_1.default);
+            const teams = yield teamRepository.find();
+            return teams;
+        });
+    }
     deletePlayerWithGivenID(req, res, playerID) {
         return __awaiter(this, void 0, void 0, function* () {
             const teamsRepository = yield typeorm_1.getConnection().getRepository(team_1.default);

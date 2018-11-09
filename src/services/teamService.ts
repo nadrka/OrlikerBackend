@@ -2,6 +2,7 @@ import { getConnection, DeepPartial } from "typeorm";
 import { Request, Response } from "express";
 import Team from "../models/team/team";
 import PlayerService from "./playerService";
+
 class TeamService {
   async createTeam(req: Request, res: Response) {
     const { error } = Team.validateTeam(req.body);
@@ -17,6 +18,12 @@ class TeamService {
 
   async getTeamsForGivenLeague() {
     const teamRepository = await getConnection().getRepository(Team);
+  }
+
+  async getAllTeams() {
+    const teamRepository = await getConnection().getRepository(Team);
+    const teams = await teamRepository.find();
+    return teams;
   }
 
   async deletePlayerWithGivenID(req: Request, res: Response, playerID: number) {

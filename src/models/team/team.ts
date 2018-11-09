@@ -49,7 +49,8 @@ export class Team {
         .min(3)
         .max(50)
         .required(),
-      captainId: Joi.number().required()
+      captainId: Joi.number().required(),
+      imgURL: Joi.string().optional()
     };
 
     return Joi.validate(team, schema);

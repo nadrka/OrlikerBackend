@@ -40,7 +40,8 @@ let User = class User {
             password: joi_1.default.string()
                 .min(5)
                 .max(50)
-                .required()
+                .required(),
+            imgURL: joi_1.default.string().optional()
         };
         return joi_1.default.validate(user, schema);
     }

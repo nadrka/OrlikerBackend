@@ -8,7 +8,10 @@ router.post("/", async (req: Request, res: Response) => {
   console.log(req.body);
   teamService.createTeam(req, res);
 });
-router.get("/", async (req: Request, res: Response) => {});
+router.get("/", async (req: Request, res: Response) => {
+  const teams = await teamService.getAllTeams();
+  res.send(teams);
+});
 router.get("/:id/players", async (req: Request, res: Response) => {});
 router.get("/:id/matches/upcoming", async (req: Request, res: Response) => {});
 router.get("/:id/matches/played", async (req: Request, res: Response) => {});

@@ -25,7 +25,8 @@ let Team = class Team {
                 .min(3)
                 .max(50)
                 .required(),
-            captainId: joi_1.default.number().required()
+            captainId: joi_1.default.number().required(),
+            imgURL: joi_1.default.string().optional()
         };
         return joi_1.default.validate(team, schema);
     }

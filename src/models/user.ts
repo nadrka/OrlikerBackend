@@ -51,7 +51,8 @@ export class User {
       password: Joi.string()
         .min(5)
         .max(50)
-        .required()
+        .required(),
+      imgURL: Joi.string().optional()
     };
 
     return Joi.validate(user, schema);
