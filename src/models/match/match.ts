@@ -25,7 +25,7 @@ export class Match {
   @Column()
   public matchDate: Date;
 
-  @Column()
+  @Column({ nullable: true })
   public acceptMatchDate: Date;
 
   @OneToOne(type => MatchResult, { nullable: true })
@@ -36,13 +36,19 @@ export class Match {
   @JoinColumn({})
   referee: User;
 
-  @OneToOne(type => Team)
-  @JoinColumn({})
-  homeTeam: Team;
+  @Column()
+  public homeTeamId: number;
 
   @OneToOne(type => Team)
-  @JoinColumn({})
-  awayTeam: MatchResult;
+  @JoinColumn({ name: "homeTeamId" })
+  homeTeam: Team;
+
+  @Column()
+  public awayTeamId: number;
+
+  @OneToOne(type => Team)
+  @JoinColumn({ name: "awayTeamId" })
+  awayTeam: Team;
 
   @OneToOne(type => League)
   @JoinColumn({})
@@ -50,7 +56,15 @@ export class Match {
 
   static validateMatch(match: Match) {
     const schema = {
-      status: Joi.string().equal(["Upcoming", "Played"])
+      status: Joi.string().equal(["Upcoming", "Played"]),
+      awayTeamId: Joi.number()
+        .min(1)
+        .required(),
+      homeTeamId: Joi.number()
+        .min(1)
+        .required(),
+      matchDate: Joi.date().required(),
+      acceptMatchDate: Joi.date().optional()
     };
 
     return Joi.validate(match, schema);

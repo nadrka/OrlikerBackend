@@ -10,6 +10,14 @@ class TeamService {
 
     const teamRepository = await getConnection().getRepository(Team);
     const teamFromRequestBody: DeepPartial<Team> = req.body;
+
+    const teamWithName = await teamRepository.find({
+      name: teamFromRequestBody.name
+    });
+
+    if (teamWithName)
+      return res.status(400).send("Team with given name already exists!");
+
     const team = await teamRepository.create(teamFromRequestBody);
 
     await getConnection().manager.save(team);
@@ -26,7 +34,33 @@ class TeamService {
     return teams;
   }
 
-  async deletePlayerWithGivenID(req: Request, res: Response, playerID: number) {
+  async getTeam(teamID: number, res: Response) {
+    const teamRepository = await getConnection().getRepository(Team);
+    const team = await teamRepository.findOne({ id: teamID });
+    if (team)
+      return res.status(400).send("Team with given id does not exists!");
+
+    res.send(team);
+  }
+
+  async updateTeam(team: Team) {
+    await getConnection().manager.save(team);
+  }
+
+  async updateTeamFromRequest(req: Request, res: Response) {
+    const teamsRepository = await getConnection().getRepository(Team);
+    const team = await teamsRepository.findOne({ id: req.params.id });
+    if (!team) return res.status(404).send("Team with given id does not exist");
+    const teamWithName = await teamsRepository.findOne({ name: req.body.name });
+    if (teamWithName)
+      return res.status(404).send("Team with given name already exist");
+    team.name = req.body.name;
+    team.imgURL = req.body.imgURL;
+    team.captainId = team.captainId;
+    await getConnection().manager.save(team);
+  }
+
+  async deleteTeamWithGivenID(req: Request, res: Response) {
     const teamsRepository = await getConnection().getRepository(Team);
     const team = await teamsRepository.findOne({ id: req.params.id });
 

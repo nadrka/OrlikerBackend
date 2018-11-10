@@ -12,7 +12,13 @@ router.get("/", async (req: Request, res: Response) => {
   const teams = await teamService.getAllTeams();
   res.send(teams);
 });
+
+router.get("/:id", async (req: Request, res: Response) => {
+  await teamService.getTeam(req.params.id, res);
+});
+
 router.get("/:id/players", async (req: Request, res: Response) => {});
+
 router.get("/:id/matches/upcoming", async (req: Request, res: Response) => {});
 router.get("/:id/matches/played", async (req: Request, res: Response) => {});
 router.get("/:id/statistics", async (req: Request, res: Response) => {});

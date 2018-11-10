@@ -3,7 +3,6 @@ import { Request, Response } from "express";
 import { MatchResult } from "./../models/match/matchResult";
 import Player from "../models/player/player";
 import Match from "../models/match/match";
-import Team from "../models/team/team";
 import League from "../models/league";
 // var loadash = require("lodash");
 class MatchService {
@@ -18,23 +17,23 @@ class MatchService {
 
   async createMatchResult(matchID: number) {}
 
-  async getUpcomingMatches(team: Team) {
+  async getUpcomingMatches(teamID: number) {
     const matchRepository = await getConnection().getRepository(Match);
     const upcomingMatches = await matchRepository
       .createQueryBuilder("match")
-      .where("match.homeTeam = :team", { team: team })
-      .orWhere("match.awayTeam = :team", { team: team })
+      .where("match.homeTeamId = :id", { id: teamID })
+      .orWhere("match.awayTeamId = :id", { id: teamID })
       .andWhere("match.status = :status", { status: "Upcoming" })
       .getMany();
     return upcomingMatches;
   }
 
-  async getPlayedMatches(team: Team) {
+  async getPlayedMatches(teamID: number) {
     const matchRepository = await getConnection().getRepository(Match);
     const playedMatches = await matchRepository
       .createQueryBuilder("match")
-      .where("match.homeTeam = :team", { team: team })
-      .orWhere("match.awayTeam = :team", { team: team })
+      .where("match.homeTeamId = :id", { id: teamID })
+      .orWhere("match.awayTeamId = :id", { id: teamID })
       .andWhere("match.status = :status", { status: "Played" })
       .getMany();
     return playedMatches;
