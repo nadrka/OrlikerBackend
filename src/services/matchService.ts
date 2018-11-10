@@ -68,18 +68,19 @@ class MatchService {
 
   async getUpcomingMatchesForLeague(league: League) {
     const matchRepository = await getConnection().getRepository(Match);
-    let upcomingMatches = await matchRepository.find({ league: league });
-    upcomingMatches = upcomingMatches.filter(match => {
-      match.status == "Upcoming";
+    let upcomingMatches = await matchRepository.find({
+      league: league,
+      status: "Upcoming"
     });
+
     return upcomingMatches;
   }
 
   async getPlayedMatchesForLeague(league: League) {
     const matchRepository = await getConnection().getRepository(Match);
-    let playedMatches = await matchRepository.find({ league: league });
-    playedMatches = playedMatches.filter(match => {
-      match.status == "Played";
+    let playedMatches = await matchRepository.find({
+      league: league,
+      status: "Played"
     });
     return playedMatches;
   }
@@ -99,7 +100,11 @@ class MatchService {
     return match;
   }
 
-  async updateMatchResult(matchID: number, req: Request, res: Response) {
+  async updateMatchWithRequestBody(
+    matchID: number,
+    req: Request,
+    res: Response
+  ) {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: matchID });
 
@@ -107,6 +112,21 @@ class MatchService {
       return res.status(400).send("Match for given id does not exist!");
     const reqBody = req.body;
     loadash.merge(match, reqBody);
+    res.send(match);
+  }
+
+  async updateMatchResult(matchID: number, req: Request, res: Response) {
+    const matchRepository = await getConnection().getRepository(Match);
+    const match = await matchRepository.findOne({ id: matchID });
+
+    if (!match)
+      return res.status(400).send("Match for given id does not exist!");
+
+    if (!match.result)
+      return res.status(400).send("This match does not have any result yet!");
+
+    loadash.merge(match.result, req.body);
+    res.send(match.result);
   }
 
   async deleteMatch(req: Request, res: Response) {

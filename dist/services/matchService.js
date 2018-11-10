@@ -84,9 +84,9 @@ class MatchService {
     getUpcomingMatchesForLeague(league) {
         return __awaiter(this, void 0, void 0, function* () {
             const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
-            let upcomingMatches = yield matchRepository.find({ league: league });
-            upcomingMatches = upcomingMatches.filter(match => {
-                match.status == "Upcoming";
+            let upcomingMatches = yield matchRepository.find({
+                league: league,
+                status: "Upcoming"
             });
             return upcomingMatches;
         });
@@ -94,9 +94,9 @@ class MatchService {
     getPlayedMatchesForLeague(league) {
         return __awaiter(this, void 0, void 0, function* () {
             const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
-            let playedMatches = yield matchRepository.find({ league: league });
-            playedMatches = playedMatches.filter(match => {
-                match.status == "Played";
+            let playedMatches = yield matchRepository.find({
+                league: league,
+                status: "Played"
             });
             return playedMatches;
         });
@@ -116,7 +116,7 @@ class MatchService {
             return match;
         });
     }
-    updateMatchResult(matchID, req, res) {
+    updateMatchWithRequestBody(matchID, req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
             const match = yield matchRepository.findOne({ id: matchID });
@@ -124,6 +124,19 @@ class MatchService {
                 return res.status(400).send("Match for given id does not exist!");
             const reqBody = req.body;
             loadash.merge(match, reqBody);
+            res.send(match);
+        });
+    }
+    updateMatchResult(matchID, req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
+            const match = yield matchRepository.findOne({ id: matchID });
+            if (!match)
+                return res.status(400).send("Match for given id does not exist!");
+            if (!match.result)
+                return res.status(400).send("This match does not have any result yet!");
+            loadash.merge(match.result, req.body);
+            res.send(match.result);
         });
     }
     deleteMatch(req, res) {

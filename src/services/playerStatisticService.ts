@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import Player from "../models/player/player";
 import User from "../models/user";
 import PlayerService from "../models/player/playerStatistic";
+import * as loadash from "lodash";
 
 class PlayerStatisticService {
   async createStatistic(req: Request, res: Response) {
@@ -23,7 +24,22 @@ class PlayerStatisticService {
 
   async getStatisticsForLeague(leagueID: number) {}
 
-  async updateStatistic() {}
+  async updateStatistic(statisticID: number, req: Request, res: Response) {
+    const playerStatisticRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
+    const playerStatistic = await playerStatisticRepository.findOne({
+      id: req.params.id
+    });
+
+    if (!playerStatistic)
+      return res
+        .status(404)
+        .send("Player's statistic with given id does not exist");
+
+    loadash.extend(playerStatistic, req.body);
+    res.send(playerStatistic);
+  }
 
   async deleteStatistic(req: Request, res: Response) {
     const playerStatisticRepository = await getConnection().getRepository(

@@ -31,9 +31,11 @@ class TeamService {
             res.send(team);
         });
     }
-    getTeamsForGivenLeague() {
+    getTeamsForGivenLeague(leagueID) {
         return __awaiter(this, void 0, void 0, function* () {
             const teamRepository = yield typeorm_1.getConnection().getRepository(team_1.default);
+            const teams = yield teamRepository.find({ currentLegueId: leagueID });
+            return teams;
         });
     }
     getAllTeams() {

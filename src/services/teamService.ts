@@ -24,8 +24,10 @@ class TeamService {
     res.send(team);
   }
 
-  async getTeamsForGivenLeague() {
+  async getTeamsForGivenLeague(leagueID: number) {
     const teamRepository = await getConnection().getRepository(Team);
+    const teams = await teamRepository.find({ currentLegueId: leagueID });
+    return teams;
   }
 
   async getAllTeams() {

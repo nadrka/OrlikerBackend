@@ -53,8 +53,12 @@ __decorate([
     __metadata("design:type", player_1.default)
 ], Team.prototype, "captain", void 0);
 __decorate([
+    typeorm_1.Column(),
+    __metadata("design:type", Number)
+], Team.prototype, "currentLegueId", void 0);
+__decorate([
     typeorm_1.OneToOne(type => league_1.default, { nullable: true }),
-    typeorm_1.JoinColumn(),
+    typeorm_1.JoinColumn({ name: "currentLegueId" }),
     __metadata("design:type", league_1.default)
 ], Team.prototype, "currentLegue", void 0);
 __decorate([

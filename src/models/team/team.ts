@@ -30,8 +30,11 @@ export class Team {
   @JoinColumn({ name: "captainId" })
   captain: Player;
 
+  @Column()
+  currentLegueId: number;
+
   @OneToOne(type => League, { nullable: true })
-  @JoinColumn()
+  @JoinColumn({ name: "currentLegueId" })
   currentLegue: League;
 
   @OneToMany(type => PlayerTeamCarrer, carrer => carrer.team)
