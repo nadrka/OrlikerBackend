@@ -67,8 +67,12 @@ __decorate([
     __metadata("design:type", user_1.User)
 ], Player.prototype, "user", void 0);
 __decorate([
+    typeorm_1.Column(),
+    __metadata("design:type", Number)
+], Player.prototype, "teamId", void 0);
+__decorate([
     typeorm_1.OneToOne(type => team_1.Team, { nullable: true }),
-    typeorm_1.JoinColumn({}),
+    typeorm_1.JoinColumn({ name: "teamId" }),
     __metadata("design:type", team_1.Team)
 ], Player.prototype, "team", void 0);
 __decorate([

@@ -27,7 +27,9 @@ router.get("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
     const player = yield playerService.getPlayerWithGivenID(req, res, req.params.id);
     res.send(player);
 }));
-router.put("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
+router.put("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield playerService.updatePlayer(req, res);
+}));
 router.delete("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
     playerService.deletePlayerWithGivenID(req, res, req.params.id);
 }));

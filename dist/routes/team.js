@@ -23,6 +23,9 @@ router.get("/", (req, res) => __awaiter(this, void 0, void 0, function* () {
     const teams = yield teamService.getAllTeams();
     res.send(teams);
 }));
+router.get("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield teamService.getTeam(req.params.id, res);
+}));
 router.get("/:id/players", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
 router.get("/:id/matches/upcoming", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
 router.get("/:id/matches/played", (req, res) => __awaiter(this, void 0, void 0, function* () { }));

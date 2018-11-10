@@ -2,6 +2,7 @@ import { getConnection } from "typeorm";
 import { Request, Response } from "express";
 import Player from "../models/player/player";
 import User from "../models/user";
+import * as loadash from "lodash";
 
 class PlayerService {
   async createPlayer(req: Request, res: Response) {
@@ -62,10 +63,8 @@ class PlayerService {
   async updatePlayer(req: Request, res: Response) {
     const playerRepository = await getConnection().getRepository(Player);
     const player = await playerRepository.findOne({ id: req.params.id });
-    player.number = req.body.number;
-    player.position = req.body.position;
-    player.strongerFoot = req.body.strongerFoot;
-    player.dateOfBirth = req.body.dateOfBirth;
+    loadash.merge(player, req.body);
+
     await getConnection().manager.save(player);
     res.send(player);
   }

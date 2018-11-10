@@ -16,12 +16,19 @@ const user_1 = require("./../user");
 const typeorm_1 = require("typeorm");
 const joi_1 = __importDefault(require("joi"));
 let MatchResult = class MatchResult {
-    static validateGenre(matchResult) {
+    static validateMatchResult(matchResult) {
         const schema = {
-            name: joi_1.default.string()
-                .min(3)
+            homeTeamResult: joi_1.default.number()
+                .min(0)
                 .max(50)
-                .required()
+                .required(),
+            awayTeamResult: joi_1.default.number()
+                .min(0)
+                .max(50)
+                .required(),
+            writtenById: joi_1.default.number()
+                .min(1)
+                .optional()
         };
         return joi_1.default.validate(matchResult, schema);
     }
@@ -39,8 +46,12 @@ __decorate([
     __metadata("design:type", Number)
 ], MatchResult.prototype, "awayTeamResult", void 0);
 __decorate([
-    typeorm_1.OneToOne(type => user_1.User),
-    typeorm_1.JoinColumn(),
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", Number)
+], MatchResult.prototype, "writtenById", void 0);
+__decorate([
+    typeorm_1.OneToOne(type => user_1.User, { nullable: true }),
+    typeorm_1.JoinColumn({ name: "writtenById" }),
     __metadata("design:type", user_1.User)
 ], MatchResult.prototype, "writtenBy", void 0);
 MatchResult = __decorate([

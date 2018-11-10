@@ -10,10 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
+const matchResult_1 = require("./../models/match/matchResult");
 const match_1 = __importDefault(require("../models/match/match"));
-// var loadash = require("lodash");
+const loadash = __importStar(require("lodash"));
 class MatchService {
     createMatch(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -25,28 +33,49 @@ class MatchService {
             res.send(match);
         });
     }
-    createMatchResult(matchID) {
-        return __awaiter(this, void 0, void 0, function* () { });
+    createMatchResult(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
+            const match = yield matchRepository.findOne({ id: req.params.id });
+            if (!match)
+                return res.status(400).send("Match for given id does not exist!");
+            const { error } = matchResult_1.MatchResult.validateMatchResult(req.body);
+            if (error)
+                return res.status(400).send(error.details[0].message);
+            const matchResultRepository = yield typeorm_1.getConnection().getRepository(matchResult_1.MatchResult);
+            const matchResult = yield matchResultRepository.create(req.body);
+            match.result = loadash.head(matchResult);
+            res.send(matchResult);
+        });
     }
-    getUpcomingMatches(team) {
+    getMatchForGivenID(matchID, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
+            const match = yield matchRepository.findOne({ id: matchID });
+            if (!match)
+                return res.status(400).send("Match for given id does not exist!");
+            res.send(match);
+        });
+    }
+    getUpcomingMatchesForTeam(teamID) {
         return __awaiter(this, void 0, void 0, function* () {
             const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
             const upcomingMatches = yield matchRepository
                 .createQueryBuilder("match")
-                .where("match.homeTeam = :team", { team: team })
-                .orWhere("match.awayTeam = :team", { team: team })
+                .where("match.homeTeamId = :id", { id: teamID })
+                .orWhere("match.awayTeamId = :id", { id: teamID })
                 .andWhere("match.status = :status", { status: "Upcoming" })
                 .getMany();
             return upcomingMatches;
         });
     }
-    getPlayedMatches(team) {
+    getPlayedMatchesForTeam(teamID) {
         return __awaiter(this, void 0, void 0, function* () {
             const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
             const playedMatches = yield matchRepository
                 .createQueryBuilder("match")
-                .where("match.homeTeam = :team", { team: team })
-                .orWhere("match.awayTeam = :team", { team: team })
+                .where("match.homeTeamId = :id", { id: teamID })
+                .orWhere("match.awayTeamId = :id", { id: teamID })
                 .andWhere("match.status = :status", { status: "Played" })
                 .getMany();
             return playedMatches;
@@ -72,14 +101,39 @@ class MatchService {
             return playedMatches;
         });
     }
+    getMatchResult(matchResultID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const matchResultRepository = yield typeorm_1.getConnection().getRepository(matchResult_1.MatchResult);
+            const matchResult = yield matchResultRepository.findOne({
+                id: matchResultID
+            });
+            return matchResult;
+        });
+    }
     updateMatch(match) {
-        return __awaiter(this, void 0, void 0, function* () { });
+        return __awaiter(this, void 0, void 0, function* () {
+            yield typeorm_1.getConnection().manager.save(match);
+            return match;
+        });
     }
-    updateMatchResult(matchID, matchResult) {
-        return __awaiter(this, void 0, void 0, function* () { });
+    updateMatchResult(matchID, req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
+            const match = yield matchRepository.findOne({ id: matchID });
+            if (!match)
+                return res.status(400).send("Match for given id does not exist!");
+            const reqBody = req.body;
+            loadash.merge(match, reqBody);
+        });
     }
-    deleteMatch(matchID) {
-        return __awaiter(this, void 0, void 0, function* () { });
+    deleteMatch(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
+            const match = yield matchRepository.findOne({ id: req.params.id });
+            if (!match)
+                return res.status(404).send("Match with given id does not exist");
+            yield typeorm_1.getConnection().manager.remove(match);
+        });
     }
 }
 exports.default = MatchService;

@@ -4,7 +4,8 @@ import { MatchResult } from "./../models/match/matchResult";
 import Player from "../models/player/player";
 import Match from "../models/match/match";
 import League from "../models/league";
-import * as _ from "lodash";
+import * as loadash from "lodash";
+
 class MatchService {
   async createMatch(req: Request, res: Response) {
     const { error } = Match.validateMatch(req.body);
@@ -28,7 +29,7 @@ class MatchService {
       MatchResult
     );
     const matchResult = await matchResultRepository.create(req.body);
-    match.result = _.head(matchResult);
+    match.result = loadash.head(matchResult);
 
     res.send(matchResult);
   }
@@ -93,9 +94,20 @@ class MatchService {
     return matchResult;
   }
 
-  async updateMatch(match: Match) {}
+  async updateMatch(match: Match) {
+    await getConnection().manager.save(match);
+    return match;
+  }
 
-  async updateMatchResult(matchID: number, req: Request) {}
+  async updateMatchResult(matchID: number, req: Request, res: Response) {
+    const matchRepository = await getConnection().getRepository(Match);
+    const match = await matchRepository.findOne({ id: matchID });
+
+    if (!match)
+      return res.status(400).send("Match for given id does not exist!");
+    const reqBody = req.body;
+    loadash.merge(match, reqBody);
+  }
 
   async deleteMatch(req: Request, res: Response) {
     const matchRepository = await getConnection().getRepository(Match);

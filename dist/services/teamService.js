@@ -21,6 +21,11 @@ class TeamService {
                 return res.status(400).send(error.details[0].message);
             const teamRepository = yield typeorm_1.getConnection().getRepository(team_1.default);
             const teamFromRequestBody = req.body;
+            const teamWithName = yield teamRepository.find({
+                name: teamFromRequestBody.name
+            });
+            if (teamWithName)
+                return res.status(400).send("Team with given name already exists!");
             const team = yield teamRepository.create(teamFromRequestBody);
             yield typeorm_1.getConnection().manager.save(team);
             res.send(team);
@@ -38,7 +43,36 @@ class TeamService {
             return teams;
         });
     }
-    deletePlayerWithGivenID(req, res, playerID) {
+    getTeam(teamID, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const teamRepository = yield typeorm_1.getConnection().getRepository(team_1.default);
+            const team = yield teamRepository.findOne({ id: teamID });
+            if (team)
+                return res.status(400).send("Team with given id does not exists!");
+            res.send(team);
+        });
+    }
+    updateTeam(team) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield typeorm_1.getConnection().manager.save(team);
+        });
+    }
+    updateTeamFromRequest(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const teamsRepository = yield typeorm_1.getConnection().getRepository(team_1.default);
+            const team = yield teamsRepository.findOne({ id: req.params.id });
+            if (!team)
+                return res.status(404).send("Team with given id does not exist");
+            const teamWithName = yield teamsRepository.findOne({ name: req.body.name });
+            if (teamWithName)
+                return res.status(404).send("Team with given name already exist");
+            team.name = req.body.name;
+            team.imgURL = req.body.imgURL;
+            team.captainId = team.captainId;
+            yield typeorm_1.getConnection().manager.save(team);
+        });
+    }
+    deleteTeamWithGivenID(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const teamsRepository = yield typeorm_1.getConnection().getRepository(team_1.default);
             const team = yield teamsRepository.findOne({ id: req.params.id });

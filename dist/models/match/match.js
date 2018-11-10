@@ -21,7 +21,15 @@ const league_1 = __importDefault(require("../league"));
 let Match = class Match {
     static validateMatch(match) {
         const schema = {
-            status: joi_1.default.string().equal(["Upcoming", "Played"])
+            status: joi_1.default.string().equal(["Upcoming", "Played"]),
+            awayTeamId: joi_1.default.number()
+                .min(1)
+                .required(),
+            homeTeamId: joi_1.default.number()
+                .min(1)
+                .required(),
+            matchDate: joi_1.default.date().required(),
+            acceptMatchDate: joi_1.default.date().optional()
         };
         return joi_1.default.validate(match, schema);
     }
@@ -43,7 +51,7 @@ __decorate([
     __metadata("design:type", Date)
 ], Match.prototype, "matchDate", void 0);
 __decorate([
-    typeorm_1.Column(),
+    typeorm_1.Column({ nullable: true }),
     __metadata("design:type", Date)
 ], Match.prototype, "acceptMatchDate", void 0);
 __decorate([
@@ -57,14 +65,22 @@ __decorate([
     __metadata("design:type", user_1.User)
 ], Match.prototype, "referee", void 0);
 __decorate([
+    typeorm_1.Column(),
+    __metadata("design:type", Number)
+], Match.prototype, "homeTeamId", void 0);
+__decorate([
     typeorm_1.OneToOne(type => team_1.default),
-    typeorm_1.JoinColumn({}),
+    typeorm_1.JoinColumn({ name: "homeTeamId" }),
     __metadata("design:type", team_1.default)
 ], Match.prototype, "homeTeam", void 0);
 __decorate([
+    typeorm_1.Column(),
+    __metadata("design:type", Number)
+], Match.prototype, "awayTeamId", void 0);
+__decorate([
     typeorm_1.OneToOne(type => team_1.default),
-    typeorm_1.JoinColumn({}),
-    __metadata("design:type", matchResult_1.default)
+    typeorm_1.JoinColumn({ name: "awayTeamId" }),
+    __metadata("design:type", team_1.default)
 ], Match.prototype, "awayTeam", void 0);
 __decorate([
     typeorm_1.OneToOne(type => league_1.default),

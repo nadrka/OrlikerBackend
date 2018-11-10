@@ -23,7 +23,9 @@ router.get("/:id", async (req: Request, res: Response) => {
   res.send(player);
 });
 
-router.put("/:id", async (req: Request, res: Response) => {});
+router.put("/:id", async (req: Request, res: Response) => {
+  await playerService.updatePlayer(req, res);
+});
 
 router.delete("/:id", async (req: Request, res: Response) => {
   playerService.deletePlayerWithGivenID(req, res, req.params.id);

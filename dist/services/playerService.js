@@ -10,10 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const player_1 = __importDefault(require("../models/player/player"));
 const user_1 = __importDefault(require("../models/user"));
+const loadash = __importStar(require("lodash"));
 class PlayerService {
     createPlayer(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -48,6 +56,15 @@ class PlayerService {
             return player;
         });
     }
+    getPlayersWithGivenTeam(teamID, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const playersRepository = yield typeorm_1.getConnection().getRepository(player_1.default);
+            const players = yield playersRepository.find({ teamId: teamID });
+            if (players)
+                return res.status(404).send("There is no player for given team!");
+            res.send(players);
+        });
+    }
     getPlayerForUser(userID) {
         return __awaiter(this, void 0, void 0, function* () {
             const userRepository = yield typeorm_1.getConnection().getRepository(user_1.default);
@@ -66,10 +83,7 @@ class PlayerService {
         return __awaiter(this, void 0, void 0, function* () {
             const playerRepository = yield typeorm_1.getConnection().getRepository(player_1.default);
             const player = yield playerRepository.findOne({ id: req.params.id });
-            player.number = req.body.number;
-            player.position = req.body.position;
-            player.strongerFoot = req.body.strongerFoot;
-            player.dateOfBirth = req.body.dateOfBirth;
+            loadash.merge(player, req.body);
             yield typeorm_1.getConnection().manager.save(player);
             res.send(player);
         });
