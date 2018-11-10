@@ -17,7 +17,17 @@ class MatchService {
 
   async createMatchResult(matchID: number) {}
 
-  async getUpcomingMatches(teamID: number) {
+  async getMatchForGivenID(matchID: number, res: Response) {
+    const matchRepository = await getConnection().getRepository(Match);
+    const match = await matchRepository.findOne({ id: matchID });
+
+    if (!match)
+      return res.status(400).send("Match for given id does not exist!");
+
+    res.send(match);
+  }
+
+  async getUpcomingMatchesForTeam(teamID: number) {
     const matchRepository = await getConnection().getRepository(Match);
     const upcomingMatches = await matchRepository
       .createQueryBuilder("match")
@@ -28,7 +38,7 @@ class MatchService {
     return upcomingMatches;
   }
 
-  async getPlayedMatches(teamID: number) {
+  async getPlayedMatchesForTeam(teamID: number) {
     const matchRepository = await getConnection().getRepository(Match);
     const playedMatches = await matchRepository
       .createQueryBuilder("match")
@@ -57,11 +67,29 @@ class MatchService {
     return playedMatches;
   }
 
+  async getMatchResult(matchResultID: number) {
+    const matchResultRepository = await getConnection().getRepository(
+      MatchResult
+    );
+    const matchResult = await matchResultRepository.findOne({
+      id: matchResultID
+    });
+    return matchResult;
+  }
+
   async updateMatch(match: Match) {}
 
-  async updateMatchResult(matchID: number, matchResult: MatchResult) {}
+  async updateMatchResult(matchID: number, req: Request) {}
 
-  async deleteMatch(matchID: number) {}
+  async deleteMatch(req: Request, res: Response) {
+    const matchRepository = await getConnection().getRepository(Match);
+    const match = await matchRepository.findOne({ id: req.params.id });
+
+    if (!match)
+      return res.status(404).send("Player with given id does not exist");
+
+    await getConnection().manager.remove(match);
+  }
 }
 
 export default MatchService;
