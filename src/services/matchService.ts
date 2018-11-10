@@ -4,7 +4,7 @@ import { MatchResult } from "./../models/match/matchResult";
 import Player from "../models/player/player";
 import Match from "../models/match/match";
 import League from "../models/league";
-// var loadash = require("lodash");
+import * as _ from "lodash";
 class MatchService {
   async createMatch(req: Request, res: Response) {
     const { error } = Match.validateMatch(req.body);
@@ -15,7 +15,23 @@ class MatchService {
     res.send(match);
   }
 
-  async createMatchResult(matchID: number) {}
+  async createMatchResult(req: Request, res: Response) {
+    const matchRepository = await getConnection().getRepository(Match);
+    const match = await matchRepository.findOne({ id: req.params.id });
+    if (!match)
+      return res.status(400).send("Match for given id does not exist!");
+
+    const { error } = MatchResult.validateMatchResult(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    const matchResultRepository = await getConnection().getRepository(
+      MatchResult
+    );
+    const matchResult = await matchResultRepository.create(req.body);
+    match.result = _.head(matchResult);
+
+    res.send(matchResult);
+  }
 
   async getMatchForGivenID(matchID: number, res: Response) {
     const matchRepository = await getConnection().getRepository(Match);
@@ -86,7 +102,7 @@ class MatchService {
     const match = await matchRepository.findOne({ id: req.params.id });
 
     if (!match)
-      return res.status(404).send("Player with given id does not exist");
+      return res.status(404).send("Match with given id does not exist");
 
     await getConnection().manager.remove(match);
   }

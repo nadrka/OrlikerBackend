@@ -19,16 +19,26 @@ export class MatchResult {
   @Column()
   public awayTeamResult: number;
 
-  @OneToOne(type => User)
-  @JoinColumn()
+  @Column({ nullable: true })
+  public writtenById: number;
+
+  @OneToOne(type => User, { nullable: true })
+  @JoinColumn({ name: "writtenById" })
   writtenBy: User;
 
-  static validateGenre(matchResult: MatchResult) {
+  static validateMatchResult(matchResult: MatchResult) {
     const schema = {
-      name: Joi.string()
-        .min(3)
+      homeTeamResult: Joi.number()
+        .min(0)
         .max(50)
-        .required()
+        .required(),
+      awayTeamResult: Joi.number()
+        .min(0)
+        .max(50)
+        .required(),
+      writtenById: Joi.number()
+        .min(1)
+        .optional()
     };
 
     return Joi.validate(matchResult, schema);
