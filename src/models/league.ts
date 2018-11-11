@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  OneToMany
-} from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from "typeorm";
 import Joi from "joi";
 import Season from "./season";
 import TeamParticipation from "./team/teamParticipation";
@@ -20,16 +14,13 @@ export class League {
   @Column()
   public group: string;
 
-  @OneToMany(
-    type => TeamParticipation,
-    teamParcitipation => teamParcitipation.league
-  )
+  @OneToMany(type => TeamParticipation, teamParcitipation => teamParcitipation.league)
   teamParcitipations: TeamParticipation[];
 
   @ManyToOne(type => Season, season => season.leagues)
   season: Season;
 
-  static validateGenre(league: League) {
+  static validateLeague(league: League) {
     const schema = {
       leagueNumber: Joi.number()
         .min(1)

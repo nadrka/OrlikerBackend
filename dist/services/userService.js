@@ -54,6 +54,7 @@ class UserService {
             res.send(user);
         });
     }
+    //todo
     deleteUser() {
         return __awaiter(this, void 0, void 0, function* () { });
     }

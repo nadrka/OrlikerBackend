@@ -12,12 +12,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const leagueService_1 = __importDefault(require("../services/leagueService"));
 const router = express_1.default.Router();
-router.post("/", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
+const leagueService = new leagueService_1.default();
+router.post("/", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    const league = yield leagueService.createLeague(req, res);
+    res.send(league);
+}));
 router.get("/:id/statistics", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
 router.get("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.get("/", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.put("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.delete("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
+router.get("/", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    const leagues = yield leagueService.getLeagues();
+    res.send(leagues);
+}));
+router.put("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield leagueService.updateLeague(req, res);
+}));
+router.delete("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield leagueService.deleteLeagueWithGivenID(req, res, req.params.id);
+    res.send();
+}));
 exports.default = router;
 //# sourceMappingURL=league.js.map

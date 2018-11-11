@@ -8,5 +8,6 @@
   "entities": ["dist/models/**/*.js"],
   "cli": {
     "entitiesDir": "src/models"
-  }
+  },
+  "synchronize": true
 }

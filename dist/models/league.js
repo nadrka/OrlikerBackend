@@ -17,7 +17,7 @@ const joi_1 = __importDefault(require("joi"));
 const season_1 = __importDefault(require("./season"));
 const teamParticipation_1 = __importDefault(require("./team/teamParticipation"));
 let League = class League {
-    static validateGenre(league) {
+    static validateLeague(league) {
         const schema = {
             leagueNumber: joi_1.default.number()
                 .min(1)
