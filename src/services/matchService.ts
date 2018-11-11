@@ -100,13 +100,9 @@ class MatchService {
     return match;
   }
 
-  async updateMatchWithRequestBody(
-    matchID: number,
-    req: Request,
-    res: Response
-  ) {
+  async updateMatchWithRequestBody(req: Request, res: Response) {
     const matchRepository = await getConnection().getRepository(Match);
-    const match = await matchRepository.findOne({ id: matchID });
+    const match = await matchRepository.findOne({ id: req.params.id });
 
     if (!match)
       return res.status(400).send("Match for given id does not exist!");
@@ -115,9 +111,9 @@ class MatchService {
     res.send(match);
   }
 
-  async updateMatchResult(matchID: number, req: Request, res: Response) {
+  async updateMatchResult(req: Request, res: Response) {
     const matchRepository = await getConnection().getRepository(Match);
-    const match = await matchRepository.findOne({ id: matchID });
+    const match = await matchRepository.findOne({ id: req.params.id });
 
     if (!match)
       return res.status(400).send("Match for given id does not exist!");

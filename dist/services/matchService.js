@@ -116,10 +116,10 @@ class MatchService {
             return match;
         });
     }
-    updateMatchWithRequestBody(matchID, req, res) {
+    updateMatchWithRequestBody(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
-            const match = yield matchRepository.findOne({ id: matchID });
+            const match = yield matchRepository.findOne({ id: req.params.id });
             if (!match)
                 return res.status(400).send("Match for given id does not exist!");
             const reqBody = req.body;
@@ -127,10 +127,10 @@ class MatchService {
             res.send(match);
         });
     }
-    updateMatchResult(matchID, req, res) {
+    updateMatchResult(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const matchRepository = yield typeorm_1.getConnection().getRepository(match_1.default);
-            const match = yield matchRepository.findOne({ id: matchID });
+            const match = yield matchRepository.findOne({ id: req.params.id });
             if (!match)
                 return res.status(400).send("Match for given id does not exist!");
             if (!match.result)

@@ -54,6 +54,9 @@ class UserService {
             res.send(user);
         });
     }
+    deleteUser() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
 }
 exports.default = UserService;
 //# sourceMappingURL=userService.js.map

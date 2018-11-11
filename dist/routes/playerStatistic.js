@@ -12,9 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const playerStatisticService_1 = __importDefault(require("../services/playerStatisticService"));
 const router = express_1.default.Router();
-router.post("/", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.put("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.delete("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
+const playerStatisticService = new playerStatisticService_1.default();
+router.post("/", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield playerStatisticService.createStatistic(req, res);
+}));
+router.put("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield playerStatisticService.updateStatistic(req, res);
+}));
+router.delete("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield playerStatisticService.deleteStatistic(req, res);
+}));
 exports.default = router;
 //# sourceMappingURL=playerStatistic.js.map

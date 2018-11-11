@@ -42,7 +42,7 @@ class PlayerStatisticService {
     getStatisticsForLeague(leagueID) {
         return __awaiter(this, void 0, void 0, function* () { });
     }
-    updateStatistic(statisticID, req, res) {
+    updateStatistic(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const playerStatisticRepository = yield typeorm_1.getConnection().getRepository(playerStatistic_1.PlayerStatistic);
             const playerStatistic = yield playerStatisticRepository.findOne({

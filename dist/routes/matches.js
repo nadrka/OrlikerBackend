@@ -12,13 +12,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const matchService_1 = __importDefault(require("../services/matchService"));
 const router = express_1.default.Router();
-router.post("/", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.post("/:id/result", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
+const matchService = new matchService_1.default();
+router.post("/", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield matchService.createMatch(req, res);
+}));
+router.post("/:id/result", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield matchService.createMatchResult(req, res);
+}));
 router.get("/:id/statistics", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.get("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.put("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.put("/:id/result", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
-router.delete("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () { }));
+router.get("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield matchService.getMatchForGivenID(req.params.id, res);
+}));
+router.put("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield matchService.updateMatchWithRequestBody(req, res);
+}));
+router.put("/:id/result", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield matchService.updateMatchResult(req, res);
+}));
+router.delete("/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    yield matchService.deleteMatch(req, res);
+}));
 exports.default = router;
 //# sourceMappingURL=matches.js.map

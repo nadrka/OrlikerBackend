@@ -24,7 +24,7 @@ class PlayerStatisticService {
 
   async getStatisticsForLeague(leagueID: number) {}
 
-  async updateStatistic(statisticID: number, req: Request, res: Response) {
+  async updateStatistic(req: Request, res: Response) {
     const playerStatisticRepository = await getConnection().getRepository(
       PlayerStatistic
     );

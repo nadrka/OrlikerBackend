@@ -43,6 +43,8 @@ class UserService {
     await getConnection().manager.save(user);
     res.send(user);
   }
+  //todo
+  async deleteUser() {}
 }
 
 export default UserService;
