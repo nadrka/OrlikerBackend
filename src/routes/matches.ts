@@ -11,7 +11,7 @@ router.post("/:id/result", async (req: Request, res: Response) => {
 });
 router.get("/:id/statistics", async (req: Request, res: Response) => {});
 router.get("/:id", async (req: Request, res: Response) => {
-  await matchService.getMatchForGivenID(req.params.id, res);
+  await matchService.getMatchForGivenID(req.params.id);
 });
 router.put("/:id", async (req: Request, res: Response) => {
   await matchService.updateMatchWithRequestBody(req, res);
