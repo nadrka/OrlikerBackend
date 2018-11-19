@@ -26,12 +26,9 @@ class PlayerService {
     return players;
   }
 
-  async getPlayerWithGivenID(req: Request, res: Response, playerID: number) {
+  async getPlayerWithGivenID(playerID: number) {
     const playersRepository = await getConnection().getRepository(Player);
     const player = await playersRepository.findOne({ id: playerID });
-
-    if (!player)
-      return res.status(404).send("Player with given id does not exist");
 
     return player;
   }

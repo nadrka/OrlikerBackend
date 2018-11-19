@@ -3,12 +3,16 @@ import { getConnection } from "typeorm";
 import { Request, Response } from "express";
 import Player from "../models/player/player";
 import User from "../models/user";
-import PlayerService from "../models/player/playerStatistic";
+import PlayerService from "../services/playerService";
 import * as loadash from "lodash";
+import MatchService from "./matchService";
 
 class PlayerStatisticService {
+  matchService = new MatchService();
+  playerService = new PlayerService();
+
   async createStatistic(req: Request, res: Response) {
-    const { error } = PlayerService.validatePlayerStatistic(req.body);
+    const { error } = PlayerStatistic.validatePlayerStatistic(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
     const playerStatisticRepository = await getConnection().getRepository(
@@ -18,7 +22,33 @@ class PlayerStatisticService {
     res.send(playerStatistic);
   }
 
-  async getStatisticsForTeam(matchID: number, teamID: number) {}
+  async getStatisticsForMatch(matchID: number) {
+    const playerStatisticRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
+    const match = await this.matchService.getMatchForGivenID(matchID);
+
+    const homeTeamStatistics = await playerStatisticRepository.find({
+      teamId: match.homeTeamId
+    });
+
+    const awayTeamStatistics = await playerStatisticRepository.find({
+      teamId: match.awayTeamId
+    });
+    const sd = awayTeamStatistics.map(async c => {
+      const player = await this.playerService.getPlayerWithGivenID(c.playerId);
+      return loadash.pick(c, [
+        player.position,
+        player.user.firstName,
+        player.user.secondName,
+        player.number,
+        c.goals,
+        c.assists,
+        c.redCards,
+        c.yellowCards
+      ]);
+    });
+  }
 
   async getStatisticsForPlayer(playerID: number) {}
 

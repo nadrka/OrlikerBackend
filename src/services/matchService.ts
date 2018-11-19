@@ -34,14 +34,11 @@ class MatchService {
     res.send(matchResult);
   }
 
-  async getMatchForGivenID(matchID: number, res: Response) {
+  async getMatchForGivenID(matchID: number) {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: matchID });
 
-    if (!match)
-      return res.status(400).send("Match for given id does not exist!");
-
-    res.send(match);
+    return match;
   }
 
   async getUpcomingMatchesForTeam(teamID: number) {
