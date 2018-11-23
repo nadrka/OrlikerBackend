@@ -14,6 +14,16 @@ router.post("/", async (req: Request, res: Response) => {
   teamService.createTeam(req, res);
 });
 
+router.post(
+  "/:id/invitations/accept",
+  async (req: Request, res: Response) => {}
+);
+
+router.post(
+  "/:id/invitations/reject",
+  async (req: Request, res: Response) => {}
+);
+
 router.get("/", async (req: Request, res: Response) => {
   const teams = await teamService.getAllTeams();
   res.send(teams);
@@ -26,6 +36,8 @@ router.get("/:id", async (req: Request, res: Response) => {
 router.get("/:id/players", async (req: Request, res: Response) => {
   await playerService.getPlayersWithGivenTeam(req.params.id, res);
 });
+
+router.get("/:id/invitations", async (req: Request, res: Response) => {});
 
 router.get("/:id/matches/upcoming", async (req: Request, res: Response) => {
   const matches = await matchService.getUpcomingMatchesForTeam(req.params.id);
