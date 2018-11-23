@@ -3,13 +3,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
-  JoinColumn,
-  OneToMany
+  JoinColumn
 } from "typeorm";
 import Joi from "joi";
 import Player from "../player/player";
-import PlayerTeamCarrer from "../player/playerTeamCarrer";
-import TeamParticipation from "./teamParticipation";
 import League from "../league";
 
 @Entity()
@@ -36,15 +33,6 @@ export class Team {
   @OneToOne(type => League, { nullable: true })
   @JoinColumn({ name: "currentLegueId" })
   currentLegue: League;
-
-  @OneToMany(type => PlayerTeamCarrer, carrer => carrer.team)
-  playerTeamCarrers: PlayerTeamCarrer[];
-
-  @OneToMany(
-    type => TeamParticipation,
-    teamParcitipation => teamParcitipation.team
-  )
-  teamParcitipations: TeamParticipation[];
 
   static validateTeam(team: Team) {
     const schema = {

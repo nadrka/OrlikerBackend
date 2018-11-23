@@ -28,7 +28,10 @@ router.post("/", async (req: Request, res: Response) => {
 
   if (!validPassword) return res.status(400).send("Invalid email or password");
   const token = existingUser.generateAuthToken();
-  res.send(token);
+  let data = {
+    token: token
+  };
+  res.send(data);
 });
 
 function validate(req: Request) {

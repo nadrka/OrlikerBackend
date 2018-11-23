@@ -1,4 +1,3 @@
-import { PlayerTeamCarrer } from "./playerTeamCarrer";
 import { Team } from "./../team/team";
 import { User } from "./../user";
 import {
@@ -38,9 +37,6 @@ export class Player {
   @OneToOne(type => Team, { nullable: true })
   @JoinColumn({ name: "teamId" })
   team: Team;
-
-  @OneToMany(type => PlayerTeamCarrer, carrer => carrer.player)
-  playerTeamCarrers: PlayerTeamCarrer[];
 
   static validatePlayer(player: Player) {
     const schema = {
