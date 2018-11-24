@@ -23,7 +23,7 @@ export class Match {
   public place: string;
 
   @Column()
-  public matchDate: Date;
+  public matchDate: Date = new Date(1990, 1, 1);
 
   @Column({ nullable: true })
   public acceptMatchDate: Date;
@@ -63,8 +63,9 @@ export class Match {
       homeTeamId: Joi.number()
         .min(1)
         .required(),
-      matchDate: Joi.date().required(),
-      acceptMatchDate: Joi.date().optional()
+      matchDate: Joi.date().optional(),
+      acceptMatchDate: Joi.date().optional(),
+      place: Joi.string().required()
     };
 
     return Joi.validate(match, schema);

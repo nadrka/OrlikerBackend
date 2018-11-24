@@ -14,6 +14,7 @@ class MatchService {
 
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.create(req.body);
+    await getConnection().manager.save(match);
     res.send(match);
   }
 
