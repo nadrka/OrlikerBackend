@@ -14,8 +14,4 @@ router.post("/", async (req: Request, res: Response) => {
   await userService.createUser(req, res);
 });
 
-router.put("/:id", async (req: Request, res: Response) => {
-  await userService.updateUser(req, res);
-});
-
 export default router;

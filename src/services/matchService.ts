@@ -5,6 +5,7 @@ import Player from "../models/player/player";
 import Match from "../models/match/match";
 import League from "../models/league";
 import * as loadash from "lodash";
+import TeamService from "./teamService";
 
 class MatchService {
   async createMatch(req: Request, res: Response) {
@@ -54,11 +55,14 @@ class MatchService {
 
   async getPlayedMatchesForTeam(teamID: number) {
     const matchRepository = await getConnection().getRepository(Match);
+    const teamService = new TeamService();
+    const team = await teamService.getTeamForGivenId(teamID);
     const playedMatches = await matchRepository
       .createQueryBuilder("match")
-      .where("match.homeTeamId = :id", { id: teamID })
-      .orWhere("match.awayTeamId = :id", { id: teamID })
+      .where("(match.homeTeamId = :id OR match.awayTeamId = :id)")
       .andWhere("match.status = :status", { status: "Played" })
+      .andWhere("match.league = :league", { league: team.currentLegueId })
+      .setParameter("id", teamID)
       .getMany();
     return playedMatches;
   }
