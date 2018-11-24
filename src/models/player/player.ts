@@ -1,13 +1,6 @@
 import { Team } from "./../team/team";
 import { User } from "./../user";
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  JoinColumn,
-  OneToMany
-} from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, OneToMany } from "typeorm";
 import Joi from "joi";
 
 @Entity()
@@ -44,12 +37,7 @@ export class Player {
         .min(0)
         .max(99)
         .required(),
-      position: Joi.string().equal([
-        "goalkeeper",
-        "defender",
-        "midfielder",
-        "striker"
-      ]),
+      position: Joi.string().equal(["goalkeeper", "defender", "midfielder", "striker"]),
       strongerFoot: Joi.string().equal(["left", "right", "both"])
     };
 

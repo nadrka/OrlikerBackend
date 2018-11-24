@@ -15,17 +15,13 @@ class PlayerStatisticService {
     const { error } = PlayerStatistic.validatePlayerStatistic(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const playerStatisticRepository = await getConnection().getRepository(
-      PlayerStatistic
-    );
+    const playerStatisticRepository = await getConnection().getRepository(PlayerStatistic);
     const playerStatistic = await playerStatisticRepository.create(req.body);
-    res.send(playerStatistic);
+    return playerStatistic;
   }
 
   async getStatisticsForMatch(matchID: number) {
-    const playerStatisticRepository = await getConnection().getRepository(
-      PlayerStatistic
-    );
+    /*const playerStatisticRepository = await getConnection().getRepository(PlayerStatistic);
     const match = await this.matchService.getMatchForGivenID(matchID);
 
     const homeTeamStatistics = await playerStatisticRepository.find({
@@ -47,7 +43,9 @@ class PlayerStatisticService {
         c.redCards,
         c.yellowCards
       ]);
-    });
+    });*/
+    const playerStatistic = await getConnection().manager.find(PlayerStatistic);
+    return playerStatistic;
   }
 
   async getStatisticsForPlayer(playerID: number) {}
@@ -55,34 +53,24 @@ class PlayerStatisticService {
   async getStatisticsForLeague(leagueID: number) {}
 
   async updateStatistic(req: Request, res: Response) {
-    const playerStatisticRepository = await getConnection().getRepository(
-      PlayerStatistic
-    );
+    const playerStatisticRepository = await getConnection().getRepository(PlayerStatistic);
     const playerStatistic = await playerStatisticRepository.findOne({
       id: req.params.id
     });
 
-    if (!playerStatistic)
-      return res
-        .status(404)
-        .send("Player's statistic with given id does not exist");
+    if (!playerStatistic) return res.status(404).send("Player's statistic with given id does not exist");
 
     loadash.extend(playerStatistic, req.body);
     res.send(playerStatistic);
   }
 
   async deleteStatistic(req: Request, res: Response) {
-    const playerStatisticRepository = await getConnection().getRepository(
-      PlayerStatistic
-    );
+    const playerStatisticRepository = await getConnection().getRepository(PlayerStatistic);
     const playerStatistic = await playerStatisticRepository.findOne({
       id: req.params.id
     });
 
-    if (!playerStatistic)
-      return res
-        .status(404)
-        .send("Player's statistic with given id does not exist");
+    if (!playerStatistic) return res.status(404).send("Player's statistic with given id does not exist");
 
     await getConnection().manager.remove(playerStatistic);
   }

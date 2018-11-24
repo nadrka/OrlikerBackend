@@ -15,12 +15,8 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 router.get("/:id", async (req: Request, res: Response) => {
-  // const player = await playerService.getPlayerWithGivenID(
-  //   req,
-  //   res,
-  //   req.params.id
-  // );
-  // res.send(player);
+  let player = await playerService.getPlayerWithGivenID(req.params.id);
+  res.send(player);
 });
 
 router.put("/:id", async (req: Request, res: Response) => {
