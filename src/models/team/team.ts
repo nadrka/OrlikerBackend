@@ -43,7 +43,6 @@ export class Team {
       captainId: Joi.number().required(),
       imgURL: Joi.string().optional()
     };
-
     return Joi.validate(team, schema);
   }
 }

@@ -3,6 +3,7 @@ import { getConnection, DeepPartial } from "typeorm";
 import express, { Request, Response } from "express";
 import { User } from "../models/user";
 import bcrypt from "bcrypt";
+import PlayerService from "../services/playerService";
 const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
@@ -23,8 +24,14 @@ router.post("/", async (req: Request, res: Response) => {
 
   if (!validPassword) return res.status(400).send("Invalid email or password");
   const token = existingUser.generateAuthToken();
+
+  const playerService = new PlayerService();
+  const player = await playerService.getPlayerForUser(existingUser.id);
   let data = {
-    token: token
+    token: token,
+    firstName: existingUser.firstName,
+    secondName: existingUser.secondName,
+    player: player
   };
   res.send(data);
 });

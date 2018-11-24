@@ -31,7 +31,7 @@ export class Player {
   @JoinColumn()
   user: User;
 
-  @Column()
+  @Column({ nullable: true })
   public teamId: number;
 
   @OneToOne(type => Team, { nullable: true })

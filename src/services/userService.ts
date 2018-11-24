@@ -31,20 +31,19 @@ class UserService {
 
     const playerService = new PlayerService();
     const player = await playerService.createPlayerForUser(user);
-    res.send(player);
+    if (player) {
+      res.send({ status: true });
+    }
   }
 
-  async updateUser(req: Request, res: Response) {
+  async updateUser(updatedUser: User) {
     const userRepository = await getConnection().getRepository(User);
-    const user = await userRepository.findOne({ id: req.params.id });
-    user.firstName = req.body.firstName;
-    user.secondName = req.body.secondName;
-    user.imgURL = req.body.imgURL;
+    const user = await userRepository.findOne({ id: updatedUser.id });
+    user.firstName = updatedUser.firstName;
+    user.secondName = updatedUser.secondName;
+    user.imgURL = updatedUser.imgURL;
     await getConnection().manager.save(user);
-    res.send(user);
   }
-  //todo
-  async deleteUser() {}
 }
 
 export default UserService;
