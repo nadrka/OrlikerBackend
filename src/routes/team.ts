@@ -29,7 +29,8 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 router.get("/:id", async (req: Request, res: Response) => {
-  await teamService.getTeam(req.params.id);
+  const team = await teamService.getTeam(req.params.id);
+  res.send(team);
 });
 
 router.get("/:id/players", async (req: Request, res: Response) => {

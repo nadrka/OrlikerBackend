@@ -24,6 +24,7 @@ class TeamService {
     const player = await playerService.getPlayerWithGivenID(req.body.captainId);
 
     const savedTeam = await getConnection().manager.save(team);
+
     player.team = savedTeam;
     player.teamId = savedTeam.id;
     playerService.updatePlayerWith(player);
@@ -45,8 +46,21 @@ class TeamService {
   async getTeam(teamID: number) {
     const teamRepository = await getConnection().getRepository(Team);
     const team = await teamRepository.findOne({ id: teamID });
-
-    return team;
+    const playerService = new PlayerService();
+    const captain = await playerService.getPlayerWithGivenID(team.captainId);
+    const data = {
+      id: team.id,
+      name: team.name,
+      currentLeagueId: team.currentLegueId,
+      imgUrl: team.imgURL,
+      captain: {
+        id: captain.id,
+        firstName: captain.user.firstName,
+        secondName: captain.user.secondName
+      }
+      //todo: dodać liczbę zwyciestw
+    };
+    return data;
   }
 
   async updateTeam(team: Team) {
@@ -58,8 +72,11 @@ class TeamService {
     const team = await teamsRepository.findOne({ id: req.params.id });
     if (!team) return res.status(404).send("Team with given id does not exist");
     const teamWithName = await teamsRepository.findOne({ name: req.body.name });
-    if (teamWithName) loadash.merge(team, req.body);
+    if (teamWithName)
+      return res.status(404).send("Team with given name already exist");
+    loadash.merge(team, req.body);
     await getConnection().manager.save(team);
+    res.send(team);
   }
 
   async deleteTeamWithGivenID(req: Request, res: Response) {
