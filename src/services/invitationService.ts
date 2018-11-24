@@ -23,17 +23,13 @@ class InvitationService {
     if (!team) {
       return res.status(400).send("Team with given id does not exists!");
     }
-    const invitationReposistory = await getConnection().getRepository(
-      Invitation
-    );
+    const invitationReposistory = await getConnection().getRepository(Invitation);
     const invitation = await invitationReposistory.create(req.body);
     res.send(invitation);
   }
 
   async rejectInvitation(req: Request, res: Response) {
-    const invitationReposistory = await getConnection().getRepository(
-      Invitation
-    );
+    const invitationReposistory = await getConnection().getRepository(Invitation);
     const invitation = await invitationReposistory.findOne({
       id: req.params.id
     });
@@ -46,9 +42,7 @@ class InvitationService {
   }
 
   async acceptInvitation(req: Request, res: Response) {
-    const invitationReposistory = await getConnection().getRepository(
-      Invitation
-    );
+    const invitationReposistory = await getConnection().getRepository(Invitation);
     const invitation = await invitationReposistory.findOne({
       id: req.params.id
     });
@@ -74,13 +68,25 @@ class InvitationService {
       return res.status(400).send("Team with given id does not exists!");
     }
 
-    const invitationReposistory = await getConnection().getRepository(
-      Invitation
-    );
+    const invitationReposistory = await getConnection().getRepository(Invitation);
 
     const teamInvitations = invitationReposistory.find({
       teamId: req.params.id
     });
+
+    return teamInvitations;
+  }
+
+  async getInvitationsForPlayer(playerId: number, res: Response) {
+    const playerService = new PlayerService();
+    const player = await playerService.getPlayerWithGivenID(playerId);
+    if (!player) {
+      return res.status(400).send("Team with given id does not exists!");
+    }
+
+    const invitationReposistory = await getConnection().getRepository(Invitation);
+
+    const teamInvitations = invitationReposistory.find({ playerId: playerId });
 
     return teamInvitations;
   }

@@ -1,11 +1,5 @@
 import Joi from "joi";
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn
-} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne } from "typeorm";
 import Team from "./team/team";
 import Player from "./player/player";
 
@@ -17,14 +11,14 @@ export class Invitation {
   @Column()
   playerId: number;
 
-  @OneToOne(type => Player)
+  @ManyToOne(type => Player)
   @JoinColumn({ name: "playerId" })
   player: Player;
 
   @Column()
   public teamId: number;
 
-  @OneToOne(type => Team, { nullable: true })
+  @ManyToOne(type => Team)
   @JoinColumn({ name: "teamId" })
   team: Team;
 
