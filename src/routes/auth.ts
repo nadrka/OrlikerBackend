@@ -5,11 +5,6 @@ import { User } from "../models/user";
 import bcrypt from "bcrypt";
 const router = express.Router();
 
-router.get("/", async (req: Request, res: Response) => {
-  const users = await getConnection().manager.find(User);
-  res.send(users);
-});
-
 router.post("/", async (req: Request, res: Response) => {
   const { error } = validate(req.body);
   if (error) res.status(400).send(error.details[0].message);
