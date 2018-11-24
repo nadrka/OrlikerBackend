@@ -32,7 +32,7 @@ class MatchService {
     );
     const matchResult = await matchResultRepository.create(req.body);
     match.result = loadash.head(matchResult);
-
+    await getConnection().manager.save(matchResult);
     res.send(matchResult);
   }
 

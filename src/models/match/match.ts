@@ -28,9 +28,15 @@ export class Match {
   @Column({ nullable: true })
   public acceptMatchDate: Date;
 
+  @Column({ nullable: true })
+  public resultId: number;
+
   @OneToOne(type => MatchResult, { nullable: true })
   @JoinColumn({})
   result: MatchResult;
+
+  @Column({ nullable: true })
+  public refereeId: number;
 
   @OneToOne(type => User, { nullable: true })
   @JoinColumn({})
@@ -63,6 +69,12 @@ export class Match {
       homeTeamId: Joi.number()
         .min(1)
         .required(),
+      refereeId: Joi.number()
+        .min(1)
+        .optional(),
+      resultId: Joi.number()
+        .min(1)
+        .optional(),
       matchDate: Joi.date().optional(),
       acceptMatchDate: Joi.date().optional(),
       place: Joi.string().required()
