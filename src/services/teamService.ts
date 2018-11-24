@@ -2,7 +2,7 @@ import { getConnection, DeepPartial } from "typeorm";
 import { Request, Response } from "express";
 import Team from "../models/team/team";
 import PlayerService from "./playerService";
-
+import * as loadash from "lodash";
 class TeamService {
   async createTeam(req: Request, res: Response) {
     const { error } = Team.validateTeam(req.body);
@@ -36,13 +36,11 @@ class TeamService {
     return teams;
   }
 
-  async getTeam(teamID: number, res: Response) {
+  async getTeam(teamID: number) {
     const teamRepository = await getConnection().getRepository(Team);
     const team = await teamRepository.findOne({ id: teamID });
-    if (team)
-      return res.status(400).send("Team with given id does not exists!");
 
-    res.send(team);
+    return team;
   }
 
   async updateTeam(team: Team) {
@@ -54,11 +52,7 @@ class TeamService {
     const team = await teamsRepository.findOne({ id: req.params.id });
     if (!team) return res.status(404).send("Team with given id does not exist");
     const teamWithName = await teamsRepository.findOne({ name: req.body.name });
-    if (teamWithName)
-      return res.status(404).send("Team with given name already exist");
-    team.name = req.body.name;
-    team.imgURL = req.body.imgURL;
-    team.captainId = team.captainId;
+    if (teamWithName) loadash.merge(team, req.body);
     await getConnection().manager.save(team);
   }
 

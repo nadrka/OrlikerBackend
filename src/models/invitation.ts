@@ -1,3 +1,4 @@
+import Joi from "joi";
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -18,7 +19,7 @@ export class Invitation {
 
   @OneToOne(type => Player)
   @JoinColumn({ name: "playerId" })
-  captain: Player;
+  player: Player;
 
   @Column()
   public teamId: number;
@@ -29,6 +30,22 @@ export class Invitation {
 
   @Column()
   public requestType: string;
+
+  static validateInvitation(invitation: Invitation) {
+    const schema = {
+      playerId: Joi.number()
+        .min(1)
+        .required(),
+      teamId: Joi.number()
+        .min(1)
+        .required(),
+      requestType: Joi.string()
+        .equal(["player", "team"])
+        .required()
+    };
+
+    return Joi.validate(invitation, schema);
+  }
 }
 
 export default Invitation;
