@@ -60,7 +60,7 @@ class InvitationService {
     const playerService = new PlayerService();
     const player = await playerService.getPlayerWithGivenID(invitation.id);
     const teamService = new TeamService();
-    const team = await teamService.getTeam(invitation.id);
+    const team = await teamService.getTeamForGivenId(invitation.id);
     player.teamId = invitation.teamId;
     player.team = team;
     playerService.updatePlayerWith(player);
