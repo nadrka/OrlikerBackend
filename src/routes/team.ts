@@ -10,7 +10,6 @@ const matchService = new MatchService();
 const playerService = new PlayerService();
 
 router.post("/", async (req: Request, res: Response) => {
-  console.log(req.body);
   teamService.createTeam(req, res);
 });
 
@@ -30,7 +29,7 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 router.get("/:id", async (req: Request, res: Response) => {
-  await teamService.getTeam(req.params.id, res);
+  await teamService.getTeam(req.params.id);
 });
 
 router.get("/:id/players", async (req: Request, res: Response) => {

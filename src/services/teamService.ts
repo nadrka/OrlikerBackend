@@ -11,7 +11,7 @@ class TeamService {
     const teamRepository = await getConnection().getRepository(Team);
     const teamFromRequestBody: DeepPartial<Team> = req.body;
 
-    const teamWithName = await teamRepository.find({
+    const teamWithName = await teamRepository.findOne({
       name: teamFromRequestBody.name
     });
 
@@ -20,7 +20,13 @@ class TeamService {
 
     const team = await teamRepository.create(teamFromRequestBody);
 
-    await getConnection().manager.save(team);
+    const playerService = new PlayerService();
+    const player = await playerService.getPlayerWithGivenID(req.body.captainId);
+
+    const savedTeam = await getConnection().manager.save(team);
+    player.team = savedTeam;
+    player.teamId = savedTeam.id;
+    playerService.updatePlayerWith(player);
     res.send(team);
   }
 

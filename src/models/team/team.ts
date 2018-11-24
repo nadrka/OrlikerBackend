@@ -3,7 +3,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
-  JoinColumn
+  JoinColumn,
+  ManyToOne
 } from "typeorm";
 import Joi from "joi";
 import Player from "../player/player";
@@ -30,8 +31,7 @@ export class Team {
   @Column()
   currentLegueId: number;
 
-  @OneToOne(type => League, { nullable: true })
-  @JoinColumn({ name: "currentLegueId" })
+  @ManyToOne(type => League, league => league.teams, { nullable: true })
   currentLegue: League;
 
   static validateTeam(team: Team) {
@@ -41,6 +41,7 @@ export class Team {
         .max(50)
         .required(),
       captainId: Joi.number().required(),
+      currentLegueId: Joi.number().required(),
       imgURL: Joi.string().optional()
     };
     return Joi.validate(team, schema);

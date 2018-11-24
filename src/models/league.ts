@@ -3,10 +3,12 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  JoinColumn
 } from "typeorm";
 import Joi from "joi";
 import Season from "./season";
+import Team from "./team/team";
 
 @Entity()
 export class League {
@@ -16,19 +18,19 @@ export class League {
   @Column()
   public leagueNumber: number;
 
-  @Column()
-  public group: string;
-
   @ManyToOne(type => Season, season => season.leagues)
+  @JoinColumn({ name: "seasonId" })
   season: Season;
+
+  @OneToMany(type => Team, team => team.currentLegue)
+  teams: Team[];
 
   static validateLeague(league: League) {
     const schema = {
       leagueNumber: Joi.number()
         .min(1)
         .max(4)
-        .required(),
-      group: Joi.string().equal(["A", "B", "C", "D"])
+        .required()
     };
 
     return Joi.validate(league, schema);
