@@ -13,16 +13,6 @@ router.post("/", async (req: Request, res: Response) => {
   teamService.createTeam(req, res);
 });
 
-router.post(
-  "/:id/invitations/accept",
-  async (req: Request, res: Response) => {}
-);
-
-router.post(
-  "/:id/invitations/reject",
-  async (req: Request, res: Response) => {}
-);
-
 router.get("/", async (req: Request, res: Response) => {
   const teams = await teamService.getAllTeams();
   res.send(teams);
@@ -34,7 +24,8 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 router.get("/:id/players", async (req: Request, res: Response) => {
-  await playerService.getPlayersWithGivenTeam(req.params.id, res);
+  const team = await teamService.getTeamForGivenId(req.params.id);
+  res.send(team.players);
 });
 
 router.get("/:id/invitations", async (req: Request, res: Response) => {});
@@ -56,7 +47,14 @@ router.put("/:id", async (req: Request, res: Response) => {
 });
 
 router.delete("/:id", async (req: Request, res: Response) => {
-  await teamService.deleteTeamWithGivenID(req, res);
+  const team = await teamService.getTeamForGivenId(req.params.id);
+  if (team.players.length <= 1) {
+    await teamService.deleteTeamWithGivenID(req, res);
+  } else {
+    res
+      .status(400)
+      .send("Deleting team with more than one player is forbiden!");
+  }
 });
 
 export default router;

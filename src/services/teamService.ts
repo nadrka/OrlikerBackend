@@ -63,6 +63,12 @@ class TeamService {
     return data;
   }
 
+  async getTeamForGivenId(teamID: number) {
+    const teamRepository = await getConnection().getRepository(Team);
+    const team = await teamRepository.findOne({ id: teamID });
+    return team;
+  }
+
   async updateTeam(team: Team) {
     await getConnection().manager.save(team);
   }

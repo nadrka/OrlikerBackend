@@ -4,7 +4,8 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   JoinColumn,
-  ManyToOne
+  ManyToOne,
+  OneToMany
 } from "typeorm";
 import Joi from "joi";
 import Player from "../player/player";
@@ -33,6 +34,9 @@ export class Team {
 
   @ManyToOne(type => League, league => league.teams, { nullable: true })
   currentLegue: League;
+
+  @OneToMany(type => Player, player => player.team)
+  players: Player[];
 
   static validateTeam(team: Team) {
     const schema = {

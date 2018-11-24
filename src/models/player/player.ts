@@ -6,7 +6,8 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   JoinColumn,
-  OneToMany
+  OneToMany,
+  ManyToOne
 } from "typeorm";
 import Joi from "joi";
 
@@ -34,7 +35,7 @@ export class Player {
   @Column({ nullable: true })
   public teamId: number;
 
-  @OneToOne(type => Team, { nullable: true })
+  @ManyToOne(type => Team, team => team.players, { nullable: true })
   @JoinColumn({ name: "teamId" })
   team: Team;
 
