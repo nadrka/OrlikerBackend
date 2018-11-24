@@ -40,9 +40,11 @@ class PlayerService {
 
   async getPlayersWithGivenTeam(teamID: number, res: Response) {
     const playersRepository = await getConnection().getRepository(Player);
-    const players = await playersRepository.find({ teamId: teamID });
+    const players = await playersRepository.find({
+      teamId: teamID
+    });
 
-    if (players)
+    if (players.length <= 0)
       return res.status(404).send("There is no player for given team!");
 
     res.send(players);

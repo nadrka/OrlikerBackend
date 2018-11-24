@@ -1,6 +1,13 @@
 import Joi from "joi";
 import { Match } from "./../match/match";
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  JoinColumn,
+  ManyToOne
+} from "typeorm";
 import Player from "./player";
 import Team from "../team/team";
 

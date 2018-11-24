@@ -24,8 +24,11 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 router.get("/:id/players", async (req: Request, res: Response) => {
-  const team = await teamService.getTeamForGivenId(req.params.id);
-  res.send(team.players);
+  const players = await playerService.getPlayersWithGivenTeam(
+    req.params.id,
+    res
+  );
+  res.send(players);
 });
 
 router.get("/:id/invitations", async (req: Request, res: Response) => {});
