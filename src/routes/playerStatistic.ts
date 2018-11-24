@@ -4,7 +4,8 @@ import PlayerStatisticService from "../services/playerStatisticService";
 const router = express.Router();
 const playerStatisticService = new PlayerStatisticService();
 router.post("/", async (req: Request, res: Response) => {
-  await playerStatisticService.createStatistic(req, res);
+  let playerStatistic = await playerStatisticService.createStatistic(req, res);
+  return playerStatistic;
 });
 router.put("/:id", async (req: Request, res: Response) => {
   await playerStatisticService.updateStatistic(req, res);

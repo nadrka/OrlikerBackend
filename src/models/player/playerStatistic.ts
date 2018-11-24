@@ -1,12 +1,6 @@
 import Joi from "joi";
 import { Match } from "./../match/match";
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn
-} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne } from "typeorm";
 import Player from "./player";
 import Team from "../team/team";
 
@@ -30,21 +24,21 @@ export class PlayerStatistic {
   @Column()
   public playerId: number;
 
-  @OneToOne(type => Player)
+  @ManyToOne(type => Player)
   @JoinColumn({ name: "playerId" })
   player: Player;
 
-  @Column()
+  /*@Column()
   public teamId: number;
 
-  @OneToOne(type => Team)
+  @ManyToOne(type => Team)
   @JoinColumn({ name: "teamId" })
-  team: Team;
+  team: Team;*/
 
   @Column()
   public matchId: number;
 
-  @OneToOne(type => Match)
+  @ManyToOne(type => Match)
   @JoinColumn({ name: "matchId" })
   match: Match;
 
@@ -64,12 +58,14 @@ export class PlayerStatistic {
         .optional(),
       playerId: Joi.number()
         .min(1)
+        .max(1)
         .required(),
-      teamId: Joi.number()
+      /*teamId: Joi.number()
         .min(1)
-        .required(),
+        .required(),*/
       matchId: Joi.number()
         .min(1)
+        .max(1)
         .required()
     };
 

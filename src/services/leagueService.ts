@@ -22,20 +22,18 @@ class LeagueService {
   async updateLeague(req: Request, res: Response) {
     const leagueRepository = await getConnection().getRepository(League);
     const league = await leagueRepository.findOne({ id: req.params.id });
-    if (!leagueRepository)
-      return res.status(404).send("League with given id does not exist");
+    if (!leagueRepository) return res.status(404).send("League with given id does not exist");
     loadash.merge(league, req.body);
 
     await getConnection().manager.save(league);
-    res.send(league);
+    return league;
   }
 
-  async deleteLeagueWithGivenID(req: Request, res: Response, leagueID: number) {
+  async deleteLeagueWithGivenID(leagueID: number, res: Response) {
     const leaguesRepository = await getConnection().getRepository(League);
     const league = await leaguesRepository.findOne({ id: leagueID });
 
-    if (!league)
-      return res.status(404).send("League with given id does not exist");
+    if (!league) return res.status(404).send("League with given id does not exist");
 
     await getConnection().manager.remove(league);
   }
