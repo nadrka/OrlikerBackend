@@ -172,27 +172,27 @@ class PlayerStatisticService {
       .groupBy(c => c.playerId)
       .map((playerStatistics, id) => ({
         playerId: +id,
-        goalSum: loadash.sumBy(playerStatistics, "goals"),
-        assistSum: loadash.sumBy(playerStatistics, "assists"),
-        yellowCardSum: loadash.sumBy(playerStatistics, "yellowCards"),
-        redCardSum: loadash.sumBy(playerStatistics, "redCards")
+        goals: loadash.sumBy(playerStatistics, "goals"),
+        assists: loadash.sumBy(playerStatistics, "assists"),
+        yellowCards: loadash.sumBy(playerStatistics, "yellowCards"),
+        redCards: loadash.sumBy(playerStatistics, "redCards")
       }))
       .value();
 
     const bestScorers = loadash(playerTeamStatistics)
-      .orderBy(c => c.goalSum, ["desc"])
+      .orderBy(c => c.goals, ["desc"])
       .take(3);
 
     const bestAsistants = loadash(playerTeamStatistics)
-      .orderBy(c => c.assistSum, ["desc"])
+      .orderBy(c => c.assists, ["desc"])
       .take(3);
 
     const mostRedCards = loadash(playerTeamStatistics)
-      .orderBy(c => c.yellowCardSum, ["desc"])
+      .orderBy(c => c.yellowCards, ["desc"])
       .take(3);
 
     const mostYellowCards = loadash(playerTeamStatistics)
-      .orderBy(c => c.yellowCardSum, ["desc"])
+      .orderBy(c => c.redCards, ["desc"])
       .take(3);
 
     return {
