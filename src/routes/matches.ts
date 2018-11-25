@@ -1,15 +1,20 @@
 import express, { Request, Response } from "express";
 import MatchService from "../services/matchService";
+import PlayerStatisticService from "../services/playerStatisticService";
 
 const router = express.Router();
+const playerStatisticService = new PlayerStatisticService();
 const matchService = new MatchService();
 router.post("/", async (req: Request, res: Response) => {
   await matchService.createMatch(req, res);
 });
-router.post("/:id/result", async (req: Request, res: Response) => {
-  await matchService.createMatchResult(req, res);
+
+router.get("/:id/statistics", async (req: Request, res: Response) => {
+  const statistcs = await playerStatisticService.getStatisticsForMatch(
+    req.params.id
+  );
+  res.send(statistcs);
 });
-router.get("/:id/statistics", async (req: Request, res: Response) => {});
 router.get("/:id", async (req: Request, res: Response) => {
   const match = await matchService.getMatchForGivenID(req.params.id);
   res.send(match);

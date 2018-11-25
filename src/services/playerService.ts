@@ -30,7 +30,10 @@ class PlayerService {
 
   async getPlayerWithGivenID(playerID: number) {
     const playersRepository = await getConnection().getRepository(Player);
-    const player = await playersRepository.findOne({ id: playerID }, { relations: ["user"] });
+    const player = await playersRepository.findOne(
+      { id: playerID },
+      { relations: ["user"] }
+    );
 
     return player;
   }
@@ -41,7 +44,8 @@ class PlayerService {
       teamId: teamID
     });
 
-    if (players.length <= 0) return res.status(404).send("There is no player for given team!");
+    if (players.length <= 0)
+      return res.status(404).send("There is no player for given team!");
 
     return players;
   }
@@ -71,7 +75,8 @@ class PlayerService {
     const player = await playersRepository.findOne({ id: playerID });
     const user = player.user;
 
-    if (!player) return res.status(404).send("Player with given id does not exist");
+    if (!player)
+      return res.status(404).send("Player with given id does not exist");
 
     await getConnection().manager.remove(player);
     await getConnection().manager.remove(user);

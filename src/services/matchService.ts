@@ -1,6 +1,5 @@
 import { getConnection } from "typeorm";
 import { Request, Response } from "express";
-import { MatchResult } from "./../models/match/matchResult";
 import Player from "../models/player/player";
 import Match from "../models/match/match";
 import League from "../models/league";
@@ -18,24 +17,6 @@ class MatchService {
     res.send(match);
   }
 
-  async createMatchResult(req: Request, res: Response) {
-    const matchRepository = await getConnection().getRepository(Match);
-    const match = await matchRepository.findOne({ id: req.params.id });
-    if (!match)
-      return res.status(400).send("Match for given id does not exist!");
-
-    const { error } = MatchResult.validateMatchResult(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-
-    const matchResultRepository = await getConnection().getRepository(
-      MatchResult
-    );
-    const matchResult = await matchResultRepository.create(req.body);
-    match.result = loadash.head(matchResult);
-    await getConnection().manager.save(matchResult);
-    res.send(matchResult);
-  }
-
   async getMatchForGivenID(matchID: number) {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: matchID });
@@ -45,13 +26,40 @@ class MatchService {
 
   async getUpcomingMatchesForTeam(teamID: number) {
     const matchRepository = await getConnection().getRepository(Match);
+    const teamService = new TeamService();
+    const team = await teamService.getTeamForGivenId(teamID);
     const upcomingMatches = await matchRepository
       .createQueryBuilder("match")
-      .where("match.homeTeamId = :id", { id: teamID })
-      .orWhere("match.awayTeamId = :id", { id: teamID })
+      .where("(match.homeTeamId = :id OR match.awayTeamId = :id)")
       .andWhere("match.status = :status", { status: "Upcoming" })
+      .andWhere("match.league = :league", { league: team.currentLegueId })
+      .setParameter("id", teamID)
       .getMany();
-    return upcomingMatches;
+
+    const data = await Promise.all(
+      upcomingMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
+    );
+    return data;
   }
 
   async getPlayedMatchesForTeam(teamID: number) {
@@ -65,17 +73,66 @@ class MatchService {
       .andWhere("match.league = :league", { league: team.currentLegueId })
       .setParameter("id", teamID)
       .getMany();
-    return playedMatches;
+
+    const data = await Promise.all(
+      playedMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
+    );
+    return data;
   }
 
   async getUpcomingMatchesForLeague(league: League) {
     const matchRepository = await getConnection().getRepository(Match);
+
     let upcomingMatches = await matchRepository.find({
       league: league,
       status: "Upcoming"
     });
+    const teamService = new TeamService();
 
-    return upcomingMatches;
+    const data = await Promise.all(
+      upcomingMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
+    );
+    return data;
   }
 
   async getPlayedMatchesForLeague(league: League) {
@@ -84,17 +141,33 @@ class MatchService {
       league: league,
       status: "Played"
     });
-    return playedMatches;
-  }
 
-  async getMatchResult(matchResultID: number) {
-    const matchResultRepository = await getConnection().getRepository(
-      MatchResult
+    const teamService = new TeamService();
+
+    const data = await Promise.all(
+      playedMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
     );
-    const matchResult = await matchResultRepository.findOne({
-      id: matchResultID
-    });
-    return matchResult;
+    return data;
   }
 
   async updateMatch(match: Match) {
@@ -119,12 +192,11 @@ class MatchService {
 
     if (!match)
       return res.status(400).send("Match for given id does not exist!");
+    match.homeTeamResult = req.body.homeTeamResult;
+    match.awayTeamResult = req.body.awayTeamResult;
 
-    if (!match.result)
-      return res.status(400).send("This match does not have any result yet!");
-
-    loadash.merge(match.result, req.body);
-    res.send(match.result);
+    getConnection().manager.save(match);
+    res.send(match);
   }
 
   async deleteMatch(req: Request, res: Response) {

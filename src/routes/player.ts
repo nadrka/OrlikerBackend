@@ -32,13 +32,18 @@ router.delete("/:id", async (req: Request, res: Response) => {
 
 router.get("/:id/invitations", async (req: Request, res: Response) => {
   const invitationService = new InvitationService();
-  const invitations = invitationService.getInvitationsForPlayer(req.params.id, res);
+  const invitations = invitationService.getInvitationsForPlayer(
+    req.params.id,
+    res
+  );
   res.send(invitations);
 });
 
 router.get("/:id/statistics", async (req: Request, res: Response) => {
   const statisticsService = new PlayerStatisticService();
-  const statistics = statisticsService.getStatisticsForPlayer(req.params.id);
+  const statistics = await statisticsService.getStatisticsForPlayer(
+    req.params.id
+  );
   res.send(statistics);
 });
 

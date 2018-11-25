@@ -7,7 +7,6 @@ import {
   JoinColumn
 } from "typeorm";
 import Joi from "joi";
-import MatchResult from "./matchResult";
 import Team from "../team/team";
 import League from "../league";
 
@@ -17,7 +16,7 @@ export class Match {
   public id: number;
 
   @Column()
-  public status: string;
+  public status: string = "Upcoming";
 
   @Column()
   public place: string;
@@ -29,11 +28,10 @@ export class Match {
   public acceptMatchDate: Date;
 
   @Column({ nullable: true })
-  public resultId: number;
+  public homeTeamResult: number;
 
-  @OneToOne(type => MatchResult, { nullable: true })
-  @JoinColumn({})
-  result: MatchResult;
+  @Column({ nullable: true })
+  public awayTeamResult: number;
 
   @Column({ nullable: true })
   public refereeId: number;
@@ -56,13 +54,18 @@ export class Match {
   @JoinColumn({ name: "awayTeamId" })
   awayTeam: Team;
 
+  @Column()
+  public leagueId: number;
+
   @OneToOne(type => League)
   @JoinColumn({})
   league: League;
 
   static validateMatch(match: Match) {
     const schema = {
-      status: Joi.string().equal(["Upcoming", "Played"]),
+      status: Joi.string()
+        .equal(["Upcoming", "Played"])
+        .optional(),
       awayTeamId: Joi.number()
         .min(1)
         .required(),
@@ -72,8 +75,17 @@ export class Match {
       refereeId: Joi.number()
         .min(1)
         .optional(),
+      leagueId: Joi.number()
+        .min(1)
+        .optional(),
       resultId: Joi.number()
         .min(1)
+        .optional(),
+      homeTeamResult: Joi.number()
+        .min(0)
+        .optional(),
+      awayTeamResult: Joi.number()
+        .min(0)
         .optional(),
       matchDate: Joi.date().optional(),
       acceptMatchDate: Joi.date().optional(),
