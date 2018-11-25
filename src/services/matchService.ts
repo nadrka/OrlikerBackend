@@ -26,13 +26,40 @@ class MatchService {
 
   async getUpcomingMatchesForTeam(teamID: number) {
     const matchRepository = await getConnection().getRepository(Match);
+    const teamService = new TeamService();
+    const team = await teamService.getTeamForGivenId(teamID);
     const upcomingMatches = await matchRepository
       .createQueryBuilder("match")
-      .where("match.homeTeamId = :id", { id: teamID })
-      .orWhere("match.awayTeamId = :id", { id: teamID })
+      .where("(match.homeTeamId = :id OR match.awayTeamId = :id)")
       .andWhere("match.status = :status", { status: "Upcoming" })
+      .andWhere("match.league = :league", { league: team.currentLegueId })
+      .setParameter("id", teamID)
       .getMany();
-    return upcomingMatches;
+
+    const data = await Promise.all(
+      upcomingMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
+    );
+    return data;
   }
 
   async getPlayedMatchesForTeam(teamID: number) {
@@ -46,17 +73,66 @@ class MatchService {
       .andWhere("match.league = :league", { league: team.currentLegueId })
       .setParameter("id", teamID)
       .getMany();
-    return playedMatches;
+
+    const data = await Promise.all(
+      playedMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
+    );
+    return data;
   }
 
   async getUpcomingMatchesForLeague(league: League) {
     const matchRepository = await getConnection().getRepository(Match);
+
     let upcomingMatches = await matchRepository.find({
       league: league,
       status: "Upcoming"
     });
+    const teamService = new TeamService();
 
-    return upcomingMatches;
+    const data = await Promise.all(
+      upcomingMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
+    );
+    return data;
   }
 
   async getPlayedMatchesForLeague(league: League) {
@@ -65,7 +141,33 @@ class MatchService {
       league: league,
       status: "Played"
     });
-    return playedMatches;
+
+    const teamService = new TeamService();
+
+    const data = await Promise.all(
+      playedMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
+    );
+    return data;
   }
 
   async updateMatch(match: Match) {
