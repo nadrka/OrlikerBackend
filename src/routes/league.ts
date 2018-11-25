@@ -1,14 +1,18 @@
 import express, { Request, Response } from "express";
 import LeagueService from "../services/leagueService";
+import PlayerStatisticService from "../services/playerStatisticService";
 
 const router = express.Router();
 const leagueService = new LeagueService();
-
+const playerStatisticsService = new PlayerStatisticService();
 router.post("/", async (req: Request, res: Response) => {
   let league = await leagueService.createLeague(req, res);
   res.send(league);
 });
-router.get("/:id/statistics", async (req: Request, res: Response) => {});
+router.get("/:id/statistics", async (req: Request, res: Response) => {
+  const statistics = await playerStatisticsService.getStatisticsForLeague(1);
+  res.send(statistics);
+});
 router.get("/:id/teams", async (req: Request, res: Response) => {});
 router.get("/:id/matches/upcoming", async (req: Request, res: Response) => {});
 router.get("/:id/matches/played", async (req: Request, res: Response) => {});

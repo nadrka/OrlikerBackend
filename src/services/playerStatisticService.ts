@@ -162,7 +162,46 @@ class PlayerStatisticService {
     return playerTeamStatistics;
   }
 
-  async getStatisticsForLeague(leagueID: number) {}
+  async getStatisticsForLeague(leagueID: number) {
+    const statisticsRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
+    let statistics = await statisticsRepository.find();
+
+    var playerTeamStatistics = loadash(statistics)
+      .groupBy(c => c.playerId)
+      .map((playerStatistics, id) => ({
+        playerId: +id,
+        goalSum: loadash.sumBy(playerStatistics, "goals"),
+        assistSum: loadash.sumBy(playerStatistics, "assists"),
+        yellowCardSum: loadash.sumBy(playerStatistics, "yellowCards"),
+        redCardSum: loadash.sumBy(playerStatistics, "redCards")
+      }))
+      .value();
+
+    const bestScorers = loadash(playerTeamStatistics)
+      .orderBy(c => c.goalSum, ["desc"])
+      .take(3);
+
+    const bestAsistants = loadash(playerTeamStatistics)
+      .orderBy(c => c.assistSum, ["desc"])
+      .take(3);
+
+    const mostRedCards = loadash(playerTeamStatistics)
+      .orderBy(c => c.yellowCardSum, ["desc"])
+      .take(3);
+
+    const mostYellowCards = loadash(playerTeamStatistics)
+      .orderBy(c => c.yellowCardSum, ["desc"])
+      .take(3);
+
+    return {
+      bestScorers: bestScorers,
+      bestAsistants: bestAsistants,
+      mostYellowCards: mostYellowCards,
+      mostRedCards: mostRedCards
+    };
+  }
 
   async updateStatistic(req: Request, res: Response) {
     const playerStatisticRepository = await getConnection().getRepository(
