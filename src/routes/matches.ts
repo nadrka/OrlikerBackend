@@ -6,9 +6,7 @@ const matchService = new MatchService();
 router.post("/", async (req: Request, res: Response) => {
   await matchService.createMatch(req, res);
 });
-router.post("/:id/result", async (req: Request, res: Response) => {
-  await matchService.createMatchResult(req, res);
-});
+
 router.get("/:id/statistics", async (req: Request, res: Response) => {});
 router.get("/:id", async (req: Request, res: Response) => {
   const match = await matchService.getMatchForGivenID(req.params.id);

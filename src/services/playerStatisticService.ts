@@ -91,7 +91,7 @@ class PlayerStatisticService {
     var playerTeamStatistics = loadash(statistics)
       .groupBy(c => c.playerId)
       .map((playerStatistics, id) => ({
-        playerId: id,
+        playerId: +id,
         goalSum: loadash.sumBy(playerStatistics, "goals"),
         assistSum: loadash.sumBy(playerStatistics, "assists"),
         yellowCardSum: loadash.sumBy(playerStatistics, "yellowCards"),
@@ -99,7 +99,25 @@ class PlayerStatisticService {
       }))
       .value();
 
-    return playerTeamStatistics;
+    const data = playerTeamStatistics.map(async statistic => {
+      const player = await this.playerService.getPlayerWithGivenID(
+        statistic.playerId
+      );
+      return {
+        player: {
+          id: player.id,
+          firstName: player.user.firstName,
+          secondName: player.user.secondName,
+          number: player.number
+        },
+        goals: statistic.goalSum,
+        assists: statistic.assistSum,
+        yellowCards: statistic.yellowCardSum,
+        redCards: statistic.redCardSum
+      };
+    });
+
+    return data;
   }
 
   async getStatisticsForPlayer(playerID: number) {

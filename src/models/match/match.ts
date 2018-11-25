@@ -7,7 +7,6 @@ import {
   JoinColumn
 } from "typeorm";
 import Joi from "joi";
-import MatchResult from "./matchResult";
 import Team from "../team/team";
 import League from "../league";
 
