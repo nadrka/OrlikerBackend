@@ -18,6 +18,15 @@ class PlayerStatisticService {
     const playerStatisticRepository = await getConnection().getRepository(
       PlayerStatistic
     );
+    const existingStatistic = await playerStatisticRepository.findOne({
+      playerId: req.body.playerId,
+      matchId: req.body.matchId
+    });
+    if (existingStatistic) {
+      return res
+        .status(400)
+        .send("Statistic for the player already exists in this match!");
+    }
     const playerStatistic = await playerStatisticRepository.create(req.body);
     res.send(playerStatistic);
     await getConnection().manager.save(playerStatistic);
