@@ -1,6 +1,5 @@
 import { getConnection } from "typeorm";
 import { Request, Response } from "express";
-import { MatchResult } from "./../models/match/matchResult";
 import Player from "../models/player/player";
 import Match from "../models/match/match";
 import League from "../models/league";
@@ -16,24 +15,6 @@ class MatchService {
     const match = await matchRepository.create(req.body);
     await getConnection().manager.save(match);
     res.send(match);
-  }
-
-  async createMatchResult(req: Request, res: Response) {
-    const matchRepository = await getConnection().getRepository(Match);
-    const match = await matchRepository.findOne({ id: req.params.id });
-    if (!match)
-      return res.status(400).send("Match for given id does not exist!");
-
-    const { error } = MatchResult.validateMatchResult(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-
-    const matchResultRepository = await getConnection().getRepository(
-      MatchResult
-    );
-    const matchResult = await matchResultRepository.create(req.body);
-    match.result = loadash.head(matchResult);
-    await getConnection().manager.save(matchResult);
-    res.send(matchResult);
   }
 
   async getMatchForGivenID(matchID: number) {
@@ -87,16 +68,6 @@ class MatchService {
     return playedMatches;
   }
 
-  async getMatchResult(matchResultID: number) {
-    const matchResultRepository = await getConnection().getRepository(
-      MatchResult
-    );
-    const matchResult = await matchResultRepository.findOne({
-      id: matchResultID
-    });
-    return matchResult;
-  }
-
   async updateMatch(match: Match) {
     await getConnection().manager.save(match);
     return match;
@@ -119,12 +90,11 @@ class MatchService {
 
     if (!match)
       return res.status(400).send("Match for given id does not exist!");
+    match.homeTeamResult = req.body.homeTeamResult;
+    match.awayTeamResult = req.body.awayTeamResult;
 
-    if (!match.result)
-      return res.status(400).send("This match does not have any result yet!");
-
-    loadash.merge(match.result, req.body);
-    res.send(match.result);
+    getConnection().manager.save(match);
+    res.send(match);
   }
 
   async deleteMatch(req: Request, res: Response) {

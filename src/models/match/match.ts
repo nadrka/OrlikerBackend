@@ -29,11 +29,10 @@ export class Match {
   public acceptMatchDate: Date;
 
   @Column({ nullable: true })
-  public resultId: number;
+  public homeTeamResult: number;
 
-  @OneToOne(type => MatchResult, { nullable: true })
-  @JoinColumn({})
-  result: MatchResult;
+  @Column({ nullable: true })
+  public awayTeamResult: number;
 
   @Column({ nullable: true })
   public refereeId: number;
@@ -74,6 +73,12 @@ export class Match {
         .optional(),
       resultId: Joi.number()
         .min(1)
+        .optional(),
+      homeTeamResult: Joi.number()
+        .min(0)
+        .optional(),
+      awayTeamResult: Joi.number()
+        .min(0)
         .optional(),
       matchDate: Joi.date().optional(),
       acceptMatchDate: Joi.date().optional(),
