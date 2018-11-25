@@ -29,50 +29,57 @@ class PlayerStatisticService {
       PlayerStatistic
     );
     const match = await this.matchService.getMatchForGivenID(matchID);
-
     const teamStatistics = await playerStatisticRepository.find({
       matchId: matchID
     });
 
     const awayTeamStatistics = teamStatistics.filter(c => {
-      c.player.teamId == match.awayTeamId;
+      return c.teamId === match.awayTeamId;
     });
     const awayTeamPlayersStatistics = await Promise.all(
       awayTeamStatistics.map(async c => {
         const player = await this.playerService.getPlayerWithGivenID(
           c.playerId
         );
-        return loadash.pick(c, [
-          player.position,
-          player.user.firstName,
-          player.user.secondName,
-          player.number,
-          c.goals,
-          c.assists,
-          c.redCards,
-          c.yellowCards
-        ]);
+        const x = {
+          player: {
+            position: player.position,
+            firstName: player.user.firstName,
+            secondName: player.user.secondName,
+            number: player.number
+          },
+          goals: c.goals,
+          assists: c.assists,
+          redCards: c.redCards,
+          yellowCards: c.yellowCards
+        };
+
+        return x;
       })
     );
 
     const homeTeamStatistics = teamStatistics.filter(c => {
-      c.player.teamId == match.homeTeamId;
+      return c.teamId === match.homeTeamId;
     });
+
     const homeTeamPlayersStatistics = await Promise.all(
       homeTeamStatistics.map(async c => {
         const player = await this.playerService.getPlayerWithGivenID(
           c.playerId
         );
-        return loadash.pick(c, [
-          player.position,
-          player.user.firstName,
-          player.user.secondName,
-          player.number,
-          c.goals,
-          c.assists,
-          c.redCards,
-          c.yellowCards
-        ]);
+        const x = {
+          player: {
+            position: player.position,
+            firstName: player.user.firstName,
+            secondName: player.user.secondName,
+            number: player.number
+          },
+          goals: c.goals,
+          assists: c.assists,
+          redCards: c.redCards,
+          yellowCards: c.yellowCards
+        };
+        return x;
       })
     );
 
@@ -135,7 +142,15 @@ class PlayerStatisticService {
       PlayerStatistic
     );
     const statistics = await statisticsRepository.find({ playerId: playerID });
-    return statistics;
+
+    var playerTeamStatistics = {
+      id: playerID,
+      goals: loadash.sumBy(statistics, "goals"),
+      assists: loadash.sumBy(statistics, "assists"),
+      yellowCards: loadash.sumBy(statistics, "yellowCards"),
+      redCards: loadash.sumBy(statistics, "redCards")
+    };
+    return playerTeamStatistics;
   }
 
   async getStatisticsForLeague(leagueID: number) {}
