@@ -7,6 +7,7 @@ import team from "../routes/team";
 import matches from "../routes/matches";
 import invitations from "../routes/invitations";
 import League from "../routes/league";
+import news from "../routes/news";
 
 function addRouters(app: Express) {
   app.use(express.json());
@@ -17,6 +18,7 @@ function addRouters(app: Express) {
   app.use("/api/players", player);
   app.use("/api/teams", team);
   app.use("/api/users", user);
+  app.use("/api/news", news);
 }
 
 export default addRouters;
