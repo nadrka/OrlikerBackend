@@ -35,12 +35,12 @@ export class PlayerStatistic {
   @JoinColumn({ name: "playerId" })
   player: Player;
 
-  /*@Column()
+  @Column()
   public teamId: number;
 
   @ManyToOne(type => Team)
   @JoinColumn({ name: "teamId" })
-  team: Team;*/
+  team: Team;
 
   @Column()
   public matchId: number;
@@ -65,14 +65,12 @@ export class PlayerStatistic {
         .optional(),
       playerId: Joi.number()
         .min(1)
-        .max(1)
         .required(),
-      /*teamId: Joi.number()
+      teamId: Joi.number()
         .min(1)
-        .required(),*/
+        .required(),
       matchId: Joi.number()
         .min(1)
-        .max(1)
         .required()
     };
 

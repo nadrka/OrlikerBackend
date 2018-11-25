@@ -3,11 +3,13 @@ import express, { Request } from "express";
 import TeamService from "../services/teamService";
 import MatchService from "../services/matchService";
 import PlayerService from "../services/playerService";
+import PlayerStatisticService from "../services/playerStatisticService";
 
 const router = express.Router();
 const teamService = new TeamService();
 const matchService = new MatchService();
 const playerService = new PlayerService();
+const playerStatisticsService = new PlayerStatisticService();
 
 router.post("/", async (req: Request, res: Response) => {
   teamService.createTeam(req, res);
@@ -43,7 +45,12 @@ router.get("/:id/matches/played", async (req: Request, res: Response) => {
   res.send(matches);
 });
 
-router.get("/:id/statistics", async (req: Request, res: Response) => {});
+router.get("/:id/statistics", async (req: Request, res: Response) => {
+  const statistics = await playerStatisticsService.getStatisticsForTeam(
+    req.params.id
+  );
+  res.send(statistics);
+});
 
 router.put("/:id", async (req: Request, res: Response) => {
   await teamService.updateTeamFromRequest(req, res);

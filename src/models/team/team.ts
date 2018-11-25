@@ -23,6 +23,24 @@ export class Team {
   public imgURL: string;
 
   @Column()
+  public matches: number = 0;
+
+  @Column()
+  public wins: number = 0;
+
+  @Column()
+  public loses: number = 0;
+
+  @Column()
+  public draws: number = 0;
+
+  @Column()
+  public scoredGoals: number = 0;
+
+  @Column()
+  public concedeGoals: number = 0;
+
+  @Column()
   captainId: number;
 
   @OneToOne(type => Player)
@@ -46,7 +64,25 @@ export class Team {
         .required(),
       captainId: Joi.number().required(),
       currentLegueId: Joi.number().required(),
-      imgURL: Joi.string().optional()
+      imgURL: Joi.string().optional(),
+      matches: Joi.number()
+        .min(0)
+        .optional(),
+      wins: Joi.number()
+        .min(0)
+        .optional(),
+      loses: Joi.number()
+        .min(0)
+        .optional(),
+      draws: Joi.number()
+        .min(0)
+        .optional(),
+      scoredGoals: Joi.number()
+        .min(0)
+        .optional(),
+      concedeGoals: Joi.number()
+        .min(0)
+        .optional()
     };
     return Joi.validate(team, schema);
   }

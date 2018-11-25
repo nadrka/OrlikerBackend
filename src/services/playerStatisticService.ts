@@ -19,6 +19,8 @@ class PlayerStatisticService {
       PlayerStatistic
     );
     const playerStatistic = await playerStatisticRepository.create(req.body);
+    res.send(playerStatistic);
+    await getConnection().manager.save(playerStatistic);
     return playerStatistic;
   }
 
@@ -35,36 +37,44 @@ class PlayerStatisticService {
     const awayTeamStatistics = teamStatistics.filter(c => {
       c.player.teamId == match.awayTeamId;
     });
-    const awayTeamPlayersStatistics = awayTeamStatistics.map(async c => {
-      const player = await this.playerService.getPlayerWithGivenID(c.playerId);
-      return loadash.pick(c, [
-        player.position,
-        player.user.firstName,
-        player.user.secondName,
-        player.number,
-        c.goals,
-        c.assists,
-        c.redCards,
-        c.yellowCards
-      ]);
-    });
+    const awayTeamPlayersStatistics = await Promise.all(
+      awayTeamStatistics.map(async c => {
+        const player = await this.playerService.getPlayerWithGivenID(
+          c.playerId
+        );
+        return loadash.pick(c, [
+          player.position,
+          player.user.firstName,
+          player.user.secondName,
+          player.number,
+          c.goals,
+          c.assists,
+          c.redCards,
+          c.yellowCards
+        ]);
+      })
+    );
 
     const homeTeamStatistics = teamStatistics.filter(c => {
       c.player.teamId == match.homeTeamId;
     });
-    const homeTeamPlayersStatistics = homeTeamStatistics.map(async c => {
-      const player = await this.playerService.getPlayerWithGivenID(c.playerId);
-      return loadash.pick(c, [
-        player.position,
-        player.user.firstName,
-        player.user.secondName,
-        player.number,
-        c.goals,
-        c.assists,
-        c.redCards,
-        c.yellowCards
-      ]);
-    });
+    const homeTeamPlayersStatistics = await Promise.all(
+      homeTeamStatistics.map(async c => {
+        const player = await this.playerService.getPlayerWithGivenID(
+          c.playerId
+        );
+        return loadash.pick(c, [
+          player.position,
+          player.user.firstName,
+          player.user.secondName,
+          player.number,
+          c.goals,
+          c.assists,
+          c.redCards,
+          c.yellowCards
+        ]);
+      })
+    );
 
     const data = {
       league: match.league,
@@ -84,9 +94,7 @@ class PlayerStatisticService {
     const statisticsRepository = await getConnection().getRepository(
       PlayerStatistic
     );
-    let statistics = await statisticsRepository.find({
-      player: { teamId: teamId }
-    });
+    let statistics = await statisticsRepository.find({ teamId: teamId });
 
     var playerTeamStatistics = loadash(statistics)
       .groupBy(c => c.playerId)
@@ -99,23 +107,25 @@ class PlayerStatisticService {
       }))
       .value();
 
-    const data = playerTeamStatistics.map(async statistic => {
-      const player = await this.playerService.getPlayerWithGivenID(
-        statistic.playerId
-      );
-      return {
-        player: {
-          id: player.id,
-          firstName: player.user.firstName,
-          secondName: player.user.secondName,
-          number: player.number
-        },
-        goals: statistic.goalSum,
-        assists: statistic.assistSum,
-        yellowCards: statistic.yellowCardSum,
-        redCards: statistic.redCardSum
-      };
-    });
+    let data = await Promise.all(
+      playerTeamStatistics.map(async statistic => {
+        const player = await this.playerService.getPlayerWithGivenID(
+          statistic.playerId
+        );
+        return {
+          player: {
+            id: player.id,
+            firstName: player.user.firstName,
+            secondName: player.user.secondName,
+            number: player.number
+          },
+          goals: statistic.goalSum,
+          assists: statistic.assistSum,
+          yellowCards: statistic.yellowCardSum,
+          redCards: statistic.redCardSum
+        };
+      })
+    );
 
     return data;
   }

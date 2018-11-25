@@ -6,6 +6,7 @@ import user from "../routes/users";
 import team from "../routes/team";
 import matches from "../routes/matches";
 import invitations from "../routes/invitations";
+import playerStatistic from "../routes/playerStatistic";
 import League from "../routes/league";
 
 function addRouters(app: Express) {
@@ -15,6 +16,7 @@ function addRouters(app: Express) {
   app.use("/api/leagues", League);
   app.use("/api/matches", matches);
   app.use("/api/players", player);
+  app.use("/api/statistics", playerStatistic);
   app.use("/api/teams", team);
   app.use("/api/users", user);
 }
