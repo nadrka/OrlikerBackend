@@ -19,6 +19,15 @@ class LeagueService {
     return leagues;
   }
 
+  async getTeamsFromGivenLeague(leagueID: number, res: Response) {
+    const leaguesRepository = await getConnection().getRepository(League);
+    const league = await leaguesRepository.findOne({ id: leagueID }, { relations: ["teams"] });
+
+    if (!league) return res.status(404).send("League with given id does not exist");
+
+    return league.teams;
+  }
+
   async updateLeague(req: Request, res: Response) {
     const leagueRepository = await getConnection().getRepository(League);
     const league = await leagueRepository.findOne({ id: req.params.id });

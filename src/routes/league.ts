@@ -13,7 +13,10 @@ router.get("/:id/statistics", async (req: Request, res: Response) => {
   const statistics = await playerStatisticsService.getStatisticsForLeague(1);
   res.send(statistics);
 });
-router.get("/:id/teams", async (req: Request, res: Response) => {});
+router.get("/:id/teams", async (req: Request, res: Response) => {
+  const teams = await leagueService.getTeamsFromGivenLeague(req.params.id,res);
+  res.send(teams);
+});
 router.get("/:id/matches/upcoming", async (req: Request, res: Response) => {});
 router.get("/:id/matches/played", async (req: Request, res: Response) => {});
 router.get("/:id/matches/all", async (req: Request, res: Response) => {});
