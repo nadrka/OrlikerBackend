@@ -25,7 +25,19 @@ class LeagueService {
 
     if (!league) return res.status(404).send("League with given id does not exist");
 
-    return league.teams;
+    let teams = league.teams;
+    let sortedTeams = loadash.orderBy(
+      teams,
+      [
+        "points",
+        team => {
+          team.scoredGoals - team.concedeGoals;
+        }
+      ],
+      ["desc", "desc"]
+    );
+
+    return sortedTeams;
   }
 
   async updateLeague(req: Request, res: Response) {
