@@ -23,6 +23,7 @@ class UserService {
     const userRepository = await getConnection().getRepository(User);
     const userFromRequestBody: DeepPartial<User> = req.body;
     let user: User = await userRepository.create(userFromRequestBody);
+    const token = user.generateAuthToken();
 
     const salt = await bcrypt.genSalt(7);
     user.password = await bcrypt.hash(user.password, salt);
@@ -32,7 +33,7 @@ class UserService {
     const playerService = new PlayerService();
     const player = await playerService.createPlayerForUser(user);
     if (player) {
-      res.send({ status: true });
+      res.send({ ...player, token });
     }
   }
 

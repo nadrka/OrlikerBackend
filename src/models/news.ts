@@ -9,7 +9,7 @@ export class News {
   @Column()
   public title: String;
 
-  @Column()
+  @Column({ type: "longtext" })
   public content: String;
 
   @Column()
