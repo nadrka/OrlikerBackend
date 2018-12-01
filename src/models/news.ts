@@ -15,10 +15,10 @@ export class News {
   @Column()
   public dateOfPublication: Date = new Date();
 
-  @Column()
-  public teamId: number;
+  @Column({ nullable: true })
+  public teamId: number = null;
 
-  @ManyToOne(type => Team)
+  @ManyToOne(type => Team, { nullable: true })
   @JoinTable()
   team: Team;
 }

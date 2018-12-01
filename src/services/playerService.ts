@@ -60,7 +60,7 @@ class PlayerService {
 
   async updatePlayer(req: Request, res: Response) {
     const playerRepository = await getConnection().getRepository(Player);
-    const player = await playerRepository.findOne({ id: req.params.id });
+    const player = await playerRepository.findOne({ id: res.locals.senderId });
     loadash.merge(player, req.body);
 
     await getConnection().manager.save(player);

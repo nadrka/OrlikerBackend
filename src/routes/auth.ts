@@ -4,6 +4,8 @@ import express, { Request, Response } from "express";
 import { User } from "../models/user";
 import bcrypt from "bcrypt";
 import PlayerService from "../services/playerService";
+import jwt from "jsonwebtoken";
+import config from "config";
 const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
@@ -17,10 +19,7 @@ router.post("/", async (req: Request, res: Response) => {
   });
   if (!existingUser) return res.status(400).send("Invalid email or password");
 
-  const validPassword = await bcrypt.compare(
-    req.body.password,
-    existingUser.password
-  );
+  const validPassword = await bcrypt.compare(req.body.password, existingUser.password);
 
   if (!validPassword) return res.status(400).send("Invalid email or password");
   const token = existingUser.generateAuthToken();
@@ -35,6 +34,17 @@ router.post("/", async (req: Request, res: Response) => {
   };
   res.send(data);
 });
+
+/*router.get("/", async (req: Request, res: Response) => {
+  res.send(
+    jwt.verify(req.headers.authorization, config.get("jwtPrivateKey"), function(err, decoded) {
+      if (err) res.sendStatus(403);
+      else {
+        res.send(decoded);
+      }
+    })
+  );
+});*/
 
 function validate(req: Request) {
   const schema = {

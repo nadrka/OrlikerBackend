@@ -4,13 +4,14 @@ import { Request } from "express";
 import { Response, NextFunction } from "express-serve-static-core";
 
 function auth(req: Request, res: Response, next: NextFunction) {
-  const token = req.header("auth-token");
-  if (!token) res.status(401).send("Access denied. No token provided");
+  const token = req.headers.authorization;
+  if (!token) res.sendStatus(403);
   try {
-    jwt.verify(token, config.get("jwtPrivateKey"));
+    let decoded: any = jwt.verify(token, config.get("jwtPrivateKey"));
+    res.locals.senderId = decoded.id;
     next();
   } catch (exepction) {
-    res.status(400).send("Invalid token.");
+    res.sendStatus(403);
   }
 }
 

@@ -28,7 +28,7 @@ export class User {
 
   generateAuthToken = function() {
     const token = jwt.sign(
-      { id: this.id, role: this.role },
+      { id: this.id },
       Config.get("jwtPrivateKey")
     );
     return token;

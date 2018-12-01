@@ -13,7 +13,7 @@ class newsService {
 
   async getNews() {
     const news = await getConnection().manager.find(News, {
-      relations: ["teams"],
+      relations: ["team"],
       order: {
         dateOfPublication: "DESC"
       }
