@@ -4,6 +4,7 @@ import TeamService from "../services/teamService";
 import MatchService from "../services/matchService";
 import PlayerService from "../services/playerService";
 import PlayerStatisticService from "../services/playerStatisticService";
+import moment from "moment";
 
 const router = express.Router();
 const teamService = new TeamService();
@@ -26,11 +27,19 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 router.get("/:id/players", async (req: Request, res: Response) => {
-  const players = await playerService.getPlayersWithGivenTeam(
-    req.params.id,
-    res
-  );
+  const players = await playerService.getPlayersWithGivenTeam(req.params.id, res);
   res.send(players);
+});
+
+router.get("/:id/playersWithStats", async (req: Request, res: Response) => {
+  const players = await playerService.getPlayersWithGivenTeam(req.params.id, res);
+  var playersWithStats: Array<any> = [];
+  for (var index = 0; index < players.length; index++) {
+    let statistics = await playerStatisticsService.getStatisticsForPlayer(players[index].id);
+    let age = moment().diff(moment(players[index].dateOfBirth), "years");
+    playersWithStats.push({ ...statistics, ...players[index], age: age });
+  }
+  res.send(playersWithStats);
 });
 
 router.get("/:id/invitations", async (req: Request, res: Response) => {});
@@ -46,9 +55,7 @@ router.get("/:id/matches/played", async (req: Request, res: Response) => {
 });
 
 router.get("/:id/statistics", async (req: Request, res: Response) => {
-  const statistics = await playerStatisticsService.getStatisticsForTeam(
-    req.params.id
-  );
+  const statistics = await playerStatisticsService.getStatisticsForTeam(req.params.id);
   res.send(statistics);
 });
 
@@ -61,9 +68,7 @@ router.delete("/:id", async (req: Request, res: Response) => {
   if (team.players.length <= 1) {
     await teamService.deleteTeamWithGivenID(req, res);
   } else {
-    res
-      .status(400)
-      .send("Deleting team with more than one player is forbiden!");
+    res.status(400).send("Deleting team with more than one player is forbiden!");
   }
 });
 

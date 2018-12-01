@@ -42,7 +42,7 @@ class PlayerService {
       relations: ["user"]
     });
 
-    if (players.length <= 0) return res.status(404).send("There is no player for given team!");
+    //if (players.length <= 0) return res.status(404).send("There is no player for given team!");
 
     return players;
   }

@@ -4,6 +4,7 @@ import Team from "../models/team/team";
 import PlayerService from "./playerService";
 import * as loadash from "lodash";
 import { Match } from "../models/match/match";
+import LeagueService from "../services/leagueService";
 class TeamService {
   async createTeam(req: Request, res: Response) {
     const { error } = Team.validateTeam(req.body);
@@ -49,6 +50,11 @@ class TeamService {
       { id: teamID },
       { relations: ["captain", "captain.user", "currentLegue"] }
     );
+    //get position
+    const leagueService = new LeagueService();
+    const leagueTeams = await leagueService.getTeamsFromGivenLeague(team.currentLegueId);
+    const position = leagueTeams.findIndex(elem => elem.id == teamID);
+    const response = { ...team, position: position + 1 };
     /*let newestMatch;
     for(var i = 0; i<=team.matches; i++){
       if (!newestMatch)
@@ -69,7 +75,7 @@ class TeamService {
       }
       //todo: dodać liczbę zwyciestw
     };*/
-    return team;
+    return response;
   }
 
   async getTeamForGivenId(teamID: number) {

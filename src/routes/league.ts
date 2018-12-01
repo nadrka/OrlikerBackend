@@ -14,7 +14,7 @@ router.get("/:id/statistics", async (req: Request, res: Response) => {
   res.send(statistics);
 });
 router.get("/:id/teams", async (req: Request, res: Response) => {
-  const teams = await leagueService.getTeamsFromGivenLeague(req.params.id,res);
+  const teams = await leagueService.getTeamsFromGivenLeague(req.params.id);
   res.send(teams);
 });
 router.get("/:id/matches/upcoming", async (req: Request, res: Response) => {});

@@ -19,11 +19,11 @@ class LeagueService {
     return leagues;
   }
 
-  async getTeamsFromGivenLeague(leagueID: number, res: Response) {
+  async getTeamsFromGivenLeague(leagueID: number) {
     const leaguesRepository = await getConnection().getRepository(League);
     const league = await leaguesRepository.findOne({ id: leagueID }, { relations: ["teams"] });
 
-    if (!league) return res.status(404).send("League with given id does not exist");
+    //if (!league) return res.status(404).send("League with given id does not exist");
 
     let teams = league.teams;
     let sortedTeams = loadash.orderBy(
