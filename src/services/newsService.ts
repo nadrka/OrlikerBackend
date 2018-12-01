@@ -20,6 +20,14 @@ class newsService {
     });
     return news;
   }
+
+  async getSingleNews(id: number) {
+    const news = await getConnection()
+      .getRepository(News)
+      .findOne(id);
+    return news;
+  }
+
   async changeNews(id: number, title: String, content: String, res: Response) {
     const newsRepository = await getConnection().getRepository(News);
     const chosenNews = await newsRepository.findOne(id);

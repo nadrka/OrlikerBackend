@@ -12,6 +12,10 @@ router.get("/", async (req: Request, res: Response) => {
   const news = await newsService.getNews();
   res.send(news);
 });
+router.get("/:id", async (req: Request, res: Response) => {
+  const news = await newsService.getSingleNews(req.params.id);
+  res.send(news);
+});
 router.put("/:id", async (req: Request, res: Response) => {
   const news = await newsService.changeNews(req.params.id, req.body.title, req.body.content, res);
   res.send(news);
