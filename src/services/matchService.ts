@@ -101,11 +101,11 @@ class MatchService {
     return data;
   }
 
-  async getUpcomingMatchesForLeague(league: League) {
+  async getUpcomingMatchesForLeague(leagueID: number) {
     const matchRepository = await getConnection().getRepository(Match);
 
     let upcomingMatches = await matchRepository.find({
-      league: league,
+      leagueId: leagueID,
       status: "Upcoming"
     });
     const teamService = new TeamService();
@@ -136,11 +136,11 @@ class MatchService {
     return data;
   }
 
-  async getPlayedMatchesForLeague(league: League) {
+  async getPlayedMatchesForLeague(leagueID: number) {
     const matchRepository = await getConnection().getRepository(Match);
     let playedMatches = await matchRepository.find({
-      league: league,
-      status: "Played"
+      status: "Played",
+      leagueId: leagueID
     });
 
     const teamService = new TeamService();
@@ -180,7 +180,8 @@ class MatchService {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: req.params.id });
 
-    if (!match) return res.status(400).send("Match for given id does not exist!");
+    if (!match)
+      return res.status(400).send("Match for given id does not exist!");
     const reqBody = req.body;
     loadash.merge(match, reqBody);
     res.send(match);
@@ -192,9 +193,11 @@ class MatchService {
     const teamRepository = await getConnection().getRepository(Team);
     const homeTeam = await teamRepository.findOne(match.homeTeamId);
     const awayTeam = await teamRepository.findOne(match.awayTeamId);
-    if (!match) return res.status(400).send("Match for given id does not exist!");
+    if (!match)
+      return res.status(400).send("Match for given id does not exist!");
     match.homeTeamResult = req.body.homeTeamResult;
     match.awayTeamResult = req.body.awayTeamResult;
+    match.status = req.body.status;
     homeTeam.matches++;
     awayTeam.matches++;
     homeTeam.concedeGoals += req.body.awayTeamResult;
@@ -226,7 +229,8 @@ class MatchService {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: req.params.id });
 
-    if (!match) return res.status(404).send("Match with given id does not exist");
+    if (!match)
+      return res.status(404).send("Match with given id does not exist");
 
     await getConnection().manager.remove(match);
   }

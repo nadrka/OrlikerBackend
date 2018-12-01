@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
+  OneToMany
+} from "typeorm";
 import Joi from "joi";
 import Player from "../player/player";
 import League from "../league";

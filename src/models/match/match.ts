@@ -4,7 +4,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
-  JoinColumn
+  JoinColumn,
+  ManyToOne
 } from "typeorm";
 import Joi from "joi";
 import Team from "../team/team";
@@ -43,22 +44,19 @@ export class Match {
   @Column()
   public homeTeamId: number;
 
-  @OneToOne(type => Team)
-  @JoinColumn({ name: "homeTeamId" })
+  @ManyToOne(type => Team)
   homeTeam: Team;
 
   @Column()
   public awayTeamId: number;
 
-  @OneToOne(type => Team)
-  @JoinColumn({ name: "awayTeamId" })
+  @ManyToOne(type => Team)
   awayTeam: Team;
 
   @Column()
   public leagueId: number;
 
-  @OneToOne(type => League)
-  @JoinColumn({})
+  @ManyToOne(type => League)
   league: League;
 
   static validateMatch(match: Match) {
