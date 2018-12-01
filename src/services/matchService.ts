@@ -6,6 +6,7 @@ import League from "../models/league";
 import * as loadash from "lodash";
 import TeamService from "./teamService";
 import { Team } from "../models/team/team";
+import LeagueService from "./leagueService";
 
 class MatchService {
   async createMatch(req: Request, res: Response) {
@@ -20,9 +21,44 @@ class MatchService {
 
   async getMatchForGivenID(matchID: number) {
     const matchRepository = await getConnection().getRepository(Match);
-    const match = await matchRepository.findOne({ id: matchID });
+    const match = await matchRepository.findOne(
+      { id: matchID },
+      { relations: ["homeTeam", "awayTeam"] }
+    );
 
-    return match;
+    const leagueService = new LeagueService();
+    const leagueTeams = await leagueService.getTeamsFromGivenLeague(
+      match.homeTeam.currentLegueId
+    );
+    const homeTeamPosition = leagueTeams.findIndex(
+      elem => elem.id == match.homeTeamId
+    );
+    const leagueTeams2 = await leagueService.getTeamsFromGivenLeague(
+      match.awayTeam.currentLegueId
+    );
+    const awayTeamPosition = leagueTeams2.findIndex(
+      elem => elem.id == match.awayTeamId
+    );
+
+    return {
+      homeTeam: {
+        id: match.homeTeamId,
+        name: match.homeTeam.name,
+        result: match.homeTeamResult,
+        position: homeTeamPosition + 1
+      },
+      awayTeam: {
+        id: match.awayTeamId,
+        name: match.awayTeam.name,
+        result: match.awayTeamResult,
+        position: awayTeamPosition + 1
+      },
+      status: match.status,
+      matchDate: match.matchDate,
+      acceptMatchDate: match.acceptMatchDate,
+      leagueId: match.leagueId,
+      refereeId: match.refereeId
+    };
   }
 
   async getUpcomingMatchesForTeam(teamID: number) {
@@ -180,7 +216,8 @@ class MatchService {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: req.params.id });
 
-    if (!match) return res.status(400).send("Match for given id does not exist!");
+    if (!match)
+      return res.status(400).send("Match for given id does not exist!");
     const reqBody = req.body;
     loadash.merge(match, reqBody);
     res.send(match);
@@ -192,7 +229,8 @@ class MatchService {
     const teamRepository = await getConnection().getRepository(Team);
     const homeTeam = await teamRepository.findOne(match.homeTeamId);
     const awayTeam = await teamRepository.findOne(match.awayTeamId);
-    if (!match) return res.status(400).send("Match for given id does not exist!");
+    if (!match)
+      return res.status(400).send("Match for given id does not exist!");
     if (match.homeTeamResult != null && match.awayTeamResult != null) {
       homeTeam.matches--;
       awayTeam.matches--;
@@ -249,7 +287,8 @@ class MatchService {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: req.params.id });
 
-    if (!match) return res.status(404).send("Match with given id does not exist");
+    if (!match)
+      return res.status(404).send("Match with given id does not exist");
 
     await getConnection().manager.remove(match);
   }
