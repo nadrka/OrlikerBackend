@@ -4,18 +4,19 @@ import { Request, Response } from "express";
 import { DeepPartial, getConnection } from "typeorm";
 
 import PlayerService from "./playerService";
+import ExpectedError from "../utils/expectedError";
 
 class UserService {
   async createUser(req: Request, res: Response) {
     const { error } = User.validateUser(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) throw new ExpectedError(error.details[0].message, 400);
 
     const userRepository = await getConnection().getRepository(User);
 
     const existingUser = await userRepository.findOne({
       login: req.body.login
     });
-    if (existingUser) return res.status(400).send("User already exist");
+    if (existingUser) throw new ExpectedError("User already exist", 400);
     this.saveUser(req, res);
   }
 

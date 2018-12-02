@@ -5,50 +5,50 @@ import * as loadash from "lodash";
 import { League } from "../models/league";
 import PlayerService from "./playerService";
 import TeamService from "./teamService";
+import ExpectedError from "../utils/expectedError";
 
 class InvitationService {
-  async createInvitation(req: Request, res: Response) {
+  async createInvitation(req: Request) {
     const { error } = Invitation.validateInvitation(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) throw new ExpectedError(error.details[0].message, 400);
 
     const playerService = new PlayerService();
     const player = await playerService.getPlayerWithGivenID(req.body.playerId);
     if (!player) {
-      return res.status(400).send("Player with given id does not exists!");
     }
 
     const teamService = new TeamService();
     const team = await teamService.getTeam(req.body.teamId);
 
     if (!team) {
-      return res.status(400).send("Team with given id does not exists!");
+      throw new ExpectedError("Team with given id does not exists!", 400);
     }
     const invitationReposistory = await getConnection().getRepository(Invitation);
     const invitation = await invitationReposistory.create(req.body);
-    res.send(invitation);
+    return invitation;
   }
 
-  async rejectInvitation(req: Request, res: Response) {
+  async rejectInvitation(req: Request) {
     const invitationReposistory = await getConnection().getRepository(Invitation);
     const invitation = await invitationReposistory.findOne({
       id: req.params.id
     });
 
     if (!invitation) {
-      return res.status(400).send("Invitation with given id does not exists!");
+      throw new ExpectedError("Invitation with given id does not exists!", 400);
     }
 
     await getConnection().manager.remove(invitation);
   }
 
-  async acceptInvitation(req: Request, res: Response) {
+  async acceptInvitation(req: Request) {
     const invitationReposistory = await getConnection().getRepository(Invitation);
     const invitation = await invitationReposistory.findOne({
       id: req.params.id
     });
 
     if (!invitation) {
-      return res.status(400).send("Invitation with given id does not exists!");
+      throw new ExpectedError("Invitation with given id does not exists!", 400);
     }
 
     const playerService = new PlayerService();
@@ -60,12 +60,12 @@ class InvitationService {
     playerService.updatePlayerWith(player);
   }
 
-  async getInvitationForTeam(req: Request, res: Response) {
+  async getInvitationForTeam(req: Request) {
     const teamService = new TeamService();
     const team = await teamService.getTeam(req.params.id);
 
     if (!team) {
-      return res.status(400).send("Team with given id does not exists!");
+      throw new ExpectedError("Team with given id does not exists!", 400);
     }
 
     const invitationReposistory = await getConnection().getRepository(Invitation);
@@ -77,11 +77,11 @@ class InvitationService {
     return teamInvitations;
   }
 
-  async getInvitationsForPlayer(playerId: number, res: Response) {
+  async getInvitationsForPlayer(playerId: number) {
     const playerService = new PlayerService();
     const player = await playerService.getPlayerWithGivenID(playerId);
     if (!player) {
-      return res.status(400).send("Team with given id does not exists!");
+      throw new ExpectedError("Team with given id does not exists!", 400);
     }
 
     const invitationReposistory = await getConnection().getRepository(Invitation);

@@ -5,6 +5,8 @@ import MatchService from "../services/matchService";
 import PlayerService from "../services/playerService";
 import PlayerStatisticService from "../services/playerStatisticService";
 import moment from "moment";
+import ExpectedError from "../utils/expectedError";
+import auth from "../middlewares/auth";
 
 const router = express.Router();
 const teamService = new TeamService();
@@ -12,8 +14,16 @@ const matchService = new MatchService();
 const playerService = new PlayerService();
 const playerStatisticsService = new PlayerStatisticService();
 
-router.post("/", async (req: Request, res: Response) => {
-  teamService.createTeam(req, res);
+//autoryzacja
+//done
+router.post("/", auth, async (req: Request, res: Response) => {
+  try {
+    const team = await teamService.createTeam(req, res.locals.senderId);
+    res.send(team);
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
+  }
 });
 
 router.get("/", async (req: Request, res: Response) => {
@@ -27,12 +37,12 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 router.get("/:id/players", async (req: Request, res: Response) => {
-  const players = await playerService.getPlayersWithGivenTeam(req.params.id, res);
+  const players = await playerService.getPlayersWithGivenTeam(req.params.id);
   res.send(players);
 });
 
 router.get("/:id/playersWithStats", async (req: Request, res: Response) => {
-  const players = await playerService.getPlayersWithGivenTeam(req.params.id, res);
+  const players = await playerService.getPlayersWithGivenTeam(req.params.id);
   var playersWithStats: Array<any> = [];
   for (var index = 0; index < players.length; index++) {
     let statistics = await playerStatisticsService.getStatisticsForPlayer(players[index].id);
@@ -42,6 +52,7 @@ router.get("/:id/playersWithStats", async (req: Request, res: Response) => {
   res.send(playersWithStats);
 });
 
+//autoryzacja
 router.get("/:id/invitations", async (req: Request, res: Response) => {});
 
 router.get("/:id/matches/upcoming", async (req: Request, res: Response) => {
@@ -59,16 +70,27 @@ router.get("/:id/statistics", async (req: Request, res: Response) => {
   res.send(statistics);
 });
 
-router.put("/:id", async (req: Request, res: Response) => {
-  await teamService.updateTeamFromRequest(req, res);
+//autoryzacja
+//done
+router.put("/", auth, async (req: Request, res: Response) => {
+  try {
+    const team = await teamService.updateTeamFromRequest(req, res.locals.senderId);
+    res.send(team);
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
+  }
 });
 
-router.delete("/:id", async (req: Request, res: Response) => {
-  const team = await teamService.getTeamForGivenId(req.params.id);
-  if (team.players.length <= 1) {
-    await teamService.deleteTeamWithGivenID(req, res);
-  } else {
-    res.status(400).send("Deleting team with more than one player is forbiden!");
+//autoryzacja
+//done
+router.delete("/", auth, async (req: Request, res: Response) => {
+  try {
+    await teamService.deleteTeamWithGivenID(res.locals.senderId);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
   }
 });
 

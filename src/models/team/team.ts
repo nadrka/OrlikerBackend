@@ -1,12 +1,4 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  JoinColumn,
-  ManyToOne,
-  OneToMany
-} from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import Joi from "joi";
 import Player from "../player/player";
 import League from "../league";
@@ -84,6 +76,9 @@ export class Team {
         .min(0)
         .optional(),
       concedeGoals: Joi.number()
+        .min(0)
+        .optional(),
+      points: Joi.number()
         .min(0)
         .optional()
     };

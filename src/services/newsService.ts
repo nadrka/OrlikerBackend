@@ -2,6 +2,7 @@ import { getConnection } from "typeorm";
 import { News } from "../models/news";
 import { Team } from "../models/team/team";
 import { Response } from "express";
+import ExpectedError from "../utils/expectedError";
 
 class newsService {
   async createNews(title: String, content: String, teamId: number) {
@@ -28,10 +29,10 @@ class newsService {
     return news;
   }
 
-  async changeNews(id: number, title: String, content: String, res: Response) {
+  async changeNews(id: number, title: String, content: String) {
     const newsRepository = await getConnection().getRepository(News);
     const chosenNews = await newsRepository.findOne(id);
-    if (!chosenNews) return res.status(400).send("No news with given id");
+    if (!chosenNews) throw new ExpectedError("No news with given id", 400);
     chosenNews.title = title;
     chosenNews.content = content;
     await getConnection().manager.save(chosenNews);

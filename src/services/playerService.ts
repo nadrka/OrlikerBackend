@@ -3,11 +3,12 @@ import { Request, Response } from "express";
 import Player from "../models/player/player";
 import User from "../models/user";
 import * as loadash from "lodash";
+import ExpectedError from "../utils/expectedError";
 
 class PlayerService {
-  async createPlayer(req: Request, res: Response) {
+  async createPlayer(req: Request) {
     const { error } = Player.validatePlayer(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) throw new ExpectedError(error.details[0].message, 400);
 
     const playerRepository = await getConnection().getRepository(Player);
     const player = await playerRepository.create(req.body);
@@ -21,7 +22,7 @@ class PlayerService {
     return player;
   }
 
-  async getAllPlayers(req: Request, res: Response) {
+  async getAllPlayers(req: Request) {
     const players = await getConnection().manager.find(Player, {
       relations: ["user"]
     });
@@ -35,14 +36,14 @@ class PlayerService {
     return player;
   }
 
-  async getPlayersWithGivenTeam(teamID: number, res: Response) {
+  async getPlayersWithGivenTeam(teamID: number) {
     const playersRepository = await getConnection().getRepository(Player);
     const players = await playersRepository.find({
       where: { teamId: teamID },
       relations: ["user"]
     });
 
-    //if (players.length <= 0) return res.status(404).send("There is no player for given team!");
+    if (players.length <= 0) throw new ExpectedError("There is no player for given team!", 400);
 
     return players;
   }
@@ -58,21 +59,21 @@ class PlayerService {
     await getConnection().manager.save(player);
   }
 
-  async updatePlayer(req: Request, res: Response) {
+  async updatePlayer(req: Request, senderId: number) {
     const playerRepository = await getConnection().getRepository(Player);
-    const player = await playerRepository.findOne({ id: res.locals.senderId });
+    const player = await playerRepository.findOne({ id: senderId });
     loadash.merge(player, req.body);
 
     await getConnection().manager.save(player);
     return player;
   }
 
-  async deletePlayerWithGivenID(playerID: number, res: Response) {
+  async deletePlayerWithGivenID(playerID: number) {
     const playersRepository = await getConnection().getRepository(Player);
     const player = await playersRepository.findOne({ id: playerID });
     const user = player.user;
 
-    if (!player) return res.status(404).send("Player with given id does not exist");
+    if (!player) throw new ExpectedError("Player with given id does not exist", 400);
 
     await getConnection().manager.remove(player);
     await getConnection().manager.remove(user);
