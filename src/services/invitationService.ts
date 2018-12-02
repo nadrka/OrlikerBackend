@@ -7,6 +7,7 @@ import PlayerService from "./playerService";
 import TeamService from "./teamService";
 
 class InvitationService {
+  playerService = new PlayerService();
   async createInvitation(req: Request, res: Response) {
     const { error } = Invitation.validateInvitation(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -23,13 +24,18 @@ class InvitationService {
     if (!team) {
       return res.status(400).send("Team with given id does not exists!");
     }
-    const invitationReposistory = await getConnection().getRepository(Invitation);
+    const invitationReposistory = await getConnection().getRepository(
+      Invitation
+    );
     const invitation = await invitationReposistory.create(req.body);
+    await getConnection().manager.save(invitation);
     res.send(invitation);
   }
 
   async rejectInvitation(req: Request, res: Response) {
-    const invitationReposistory = await getConnection().getRepository(Invitation);
+    const invitationReposistory = await getConnection().getRepository(
+      Invitation
+    );
     const invitation = await invitationReposistory.findOne({
       id: req.params.id
     });
@@ -42,7 +48,9 @@ class InvitationService {
   }
 
   async acceptInvitation(req: Request, res: Response) {
-    const invitationReposistory = await getConnection().getRepository(Invitation);
+    const invitationReposistory = await getConnection().getRepository(
+      Invitation
+    );
     const invitation = await invitationReposistory.findOne({
       id: req.params.id
     });
@@ -68,13 +76,33 @@ class InvitationService {
       return res.status(400).send("Team with given id does not exists!");
     }
 
-    const invitationReposistory = await getConnection().getRepository(Invitation);
+    const invitationReposistory = await getConnection().getRepository(
+      Invitation
+    );
 
-    const teamInvitations = invitationReposistory.find({
-      teamId: req.params.id
+    const teamInvitations = await invitationReposistory.find({
+      teamId: req.params.id,
+      requestType: "player"
     });
 
-    return teamInvitations;
+    const mappedInvitations = await Promise.all(
+      teamInvitations.map(async invitation => {
+        const player = await this.playerService.getPlayerWithGivenID(
+          invitation.playerId
+        );
+        return {
+          id: invitation.id,
+          player: {
+            id: invitation.playerId,
+            firstName: player.user.firstName,
+            secondName: player.user.secondName,
+            number: player.number
+          }
+        };
+      })
+    );
+
+    res.send(mappedInvitations);
   }
 
   async getInvitationsForPlayer(playerId: number, res: Response) {
@@ -84,11 +112,26 @@ class InvitationService {
       return res.status(400).send("Team with given id does not exists!");
     }
 
-    const invitationReposistory = await getConnection().getRepository(Invitation);
+    const invitationReposistory = await getConnection().getRepository(
+      Invitation
+    );
 
-    const teamInvitations = invitationReposistory.find({ playerId: playerId });
+    const teamInvitations = await invitationReposistory.find({
+      where: { playerId: playerId, requestType: "team" },
+      relations: ["team"]
+    });
 
-    return teamInvitations;
+    const mappedInvitations = teamInvitations.map(invitation => {
+      return {
+        id: invitation.id,
+        team: {
+          id: invitation.teamId,
+          name: invitation.team.name,
+          league: invitation.team.currentLegueId
+        }
+      };
+    });
+    return mappedInvitations;
   }
 }
 
