@@ -18,6 +18,11 @@ router.get("/", async (req: Request, res: Response) => {
   res.send(players);
 });
 
+router.get("/without/team", async (req: Request, res: Response) => {
+  const players = await playerService.getAllPlayersWithoutTeam();
+  res.send(players);
+});
+
 router.get("/:id", async (req: Request, res: Response) => {
   let player = await playerService.getPlayerWithGivenID(req.params.id);
   res.send(player);

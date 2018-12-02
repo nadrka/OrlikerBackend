@@ -7,12 +7,14 @@ import PlayerStatisticService from "../services/playerStatisticService";
 import moment from "moment";
 import ExpectedError from "../utils/expectedError";
 import auth from "../middlewares/auth";
+import InvitationService from "../services/invitationService";
 
 const router = express.Router();
 const teamService = new TeamService();
 const matchService = new MatchService();
 const playerService = new PlayerService();
 const playerStatisticsService = new PlayerStatisticService();
+const invitationService = new InvitationService();
 
 //autoryzacja
 //done
@@ -52,8 +54,10 @@ router.get("/:id/playersWithStats", async (req: Request, res: Response) => {
   res.send(playersWithStats);
 });
 
-//autoryzacja
-router.get("/:id/invitations", async (req: Request, res: Response) => {});
+router.get("/:id/invitations", async (req: Request, res: Response) => {
+  const invitations = await invitationService.getInvitationForTeam(req);
+  res.send(invitations);
+});
 
 router.get("/:id/matches/upcoming", async (req: Request, res: Response) => {
   const matches = await matchService.getUpcomingMatchesForTeam(req.params.id);

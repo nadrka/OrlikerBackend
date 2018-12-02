@@ -2,7 +2,7 @@ import { getConnection, DeepPartial } from "typeorm";
 import { Request, Response } from "express";
 import Team from "../models/team/team";
 import PlayerService from "./playerService";
-import * as loadash from "lodash";
+import loadash from "lodash";
 import { Match } from "../models/match/match";
 import LeagueService from "../services/leagueService";
 import ExpectedError from "../utils/expectedError";
@@ -62,7 +62,15 @@ class TeamService {
   async getAllTeams() {
     const teamRepository = await getConnection().getRepository(Team);
     const teams = await teamRepository.find();
-    return teams;
+
+    var playerTeamStatistics = loadash(teams)
+      .groupBy(t => t.currentLegueId)
+      .map((teams, id) => ({
+        league: +id,
+        teams: teams
+      }));
+
+    return playerTeamStatistics;
   }
 
   async getTeam(teamID: number) {

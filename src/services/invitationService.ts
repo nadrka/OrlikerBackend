@@ -8,6 +8,7 @@ import TeamService from "./teamService";
 import ExpectedError from "../utils/expectedError";
 
 class InvitationService {
+  playerService = new PlayerService();
   async createInvitation(req: Request) {
     const { error } = Invitation.validateInvitation(req.body);
     if (error) throw new ExpectedError(error.details[0].message, 400);
@@ -70,11 +71,27 @@ class InvitationService {
 
     const invitationReposistory = await getConnection().getRepository(Invitation);
 
-    const teamInvitations = invitationReposistory.find({
-      teamId: req.params.id
+    const teamInvitations = await invitationReposistory.find({
+      teamId: req.params.id,
+      requestType: "player"
     });
 
-    return teamInvitations;
+    const mappedInvitations = await Promise.all(
+      teamInvitations.map(async invitation => {
+        const player = await this.playerService.getPlayerWithGivenID(invitation.playerId);
+        return {
+          id: invitation.id,
+          player: {
+            id: invitation.playerId,
+            firstName: player.user.firstName,
+            secondName: player.user.secondName,
+            number: player.number
+          }
+        };
+      })
+    );
+
+    return mappedInvitations;
   }
 
   async getInvitationsForPlayer(playerId: number) {
@@ -86,9 +103,22 @@ class InvitationService {
 
     const invitationReposistory = await getConnection().getRepository(Invitation);
 
-    const teamInvitations = invitationReposistory.find({ playerId: playerId });
+    const teamInvitations = await invitationReposistory.find({
+      where: { playerId: playerId, requestType: "team" },
+      relations: ["team"]
+    });
 
-    return teamInvitations;
+    const mappedInvitations = teamInvitations.map(invitation => {
+      return {
+        id: invitation.id,
+        team: {
+          id: invitation.teamId,
+          name: invitation.team.name,
+          league: invitation.team.currentLegueId
+        }
+      };
+    });
+    return mappedInvitations;
   }
 }
 

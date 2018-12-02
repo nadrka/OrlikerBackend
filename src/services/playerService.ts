@@ -29,6 +29,24 @@ class PlayerService {
     return players;
   }
 
+  async getAllPlayersWithoutTeam() {
+    const playersRepository = await getConnection().getRepository(Player);
+    const players = await playersRepository.find({
+      where: { teamId: null },
+      relations: ["user"]
+    });
+
+    const mappedPlayers = players.map(player => {
+      return {
+        id: player.id,
+        firstName: player.user.firstName,
+        secondName: player.user.secondName,
+        number: player.number
+      };
+    });
+    return mappedPlayers;
+  }
+
   async getPlayerWithGivenID(playerID: number) {
     const playersRepository = await getConnection().getRepository(Player);
     const player = await playersRepository.findOne({ id: playerID }, { relations: ["user"] });
