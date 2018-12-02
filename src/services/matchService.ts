@@ -53,6 +53,7 @@ class MatchService {
         result: match.awayTeamResult,
         position: awayTeamPosition + 1
       },
+      place: match.place,
       status: match.status,
       matchDate: match.matchDate,
       acceptMatchDate: match.acceptMatchDate,
@@ -71,6 +72,7 @@ class MatchService {
       .andWhere("match.status = :status", { status: "Upcoming" })
       .andWhere("match.league = :league", { league: team.currentLegueId })
       .setParameter("id", teamID)
+      .orderBy("match.matchDate", "ASC")
       .getMany();
 
     const data = await Promise.all(
@@ -109,6 +111,7 @@ class MatchService {
       .andWhere("match.status = :status", { status: "Played" })
       .andWhere("match.league = :league", { league: team.currentLegueId })
       .setParameter("id", teamID)
+      .orderBy("match.matchDate", "DESC")
       .getMany();
 
     const data = await Promise.all(
@@ -141,8 +144,10 @@ class MatchService {
     const matchRepository = await getConnection().getRepository(Match);
 
     let upcomingMatches = await matchRepository.find({
-      leagueId: leagueID,
-      status: "Upcoming"
+      where: { leagueId: leagueID, status: "Upcoming" },
+      order: {
+        matchDate: "ASC"
+      }
     });
     const teamService = new TeamService();
 
@@ -175,8 +180,10 @@ class MatchService {
   async getPlayedMatchesForLeague(leagueID: number) {
     const matchRepository = await getConnection().getRepository(Match);
     let playedMatches = await matchRepository.find({
-      status: "Played",
-      leagueId: leagueID
+      where: { status: "Played", leagueId: leagueID },
+      order: {
+        matchDate: "DESC"
+      }
     });
 
     const teamService = new TeamService();

@@ -2,7 +2,7 @@ import { getConnection, DeepPartial } from "typeorm";
 import { Request, Response } from "express";
 import Team from "../models/team/team";
 import PlayerService from "./playerService";
-import * as loadash from "lodash";
+import loadash from "lodash";
 import { Match } from "../models/match/match";
 import LeagueService from "../services/leagueService";
 class TeamService {
@@ -17,7 +17,8 @@ class TeamService {
       name: teamFromRequestBody.name
     });
 
-    if (teamWithName) return res.status(400).send("Team with given name already exists!");
+    if (teamWithName)
+      return res.status(400).send("Team with given name already exists!");
 
     const team = await teamRepository.create(teamFromRequestBody);
 
@@ -41,7 +42,15 @@ class TeamService {
   async getAllTeams() {
     const teamRepository = await getConnection().getRepository(Team);
     const teams = await teamRepository.find();
-    return teams;
+
+    var playerTeamStatistics = loadash(teams)
+      .groupBy(t => t.currentLegueId)
+      .map((teams, id) => ({
+        league: +id,
+        teams: teams
+      }));
+
+    return playerTeamStatistics;
   }
 
   async getTeam(teamID: number) {
@@ -52,7 +61,9 @@ class TeamService {
     );
     //get position
     const leagueService = new LeagueService();
-    const leagueTeams = await leagueService.getTeamsFromGivenLeague(team.currentLegueId);
+    const leagueTeams = await leagueService.getTeamsFromGivenLeague(
+      team.currentLegueId
+    );
     const position = leagueTeams.findIndex(elem => elem.id == teamID);
     const response = { ...team, position: position + 1 };
     /*let newestMatch;
@@ -93,7 +104,8 @@ class TeamService {
     const team = await teamsRepository.findOne({ id: req.params.id });
     if (!team) return res.status(404).send("Team with given id does not exist");
     const teamWithName = await teamsRepository.findOne({ name: req.body.name });
-    if (teamWithName) return res.status(404).send("Team with given name already exist");
+    if (teamWithName)
+      return res.status(404).send("Team with given name already exist");
     loadash.merge(team, req.body);
     await getConnection().manager.save(team);
     res.send(team);
