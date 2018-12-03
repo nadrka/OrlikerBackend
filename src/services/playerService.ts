@@ -4,6 +4,7 @@ import Player from "../models/player/player";
 import User from "../models/user";
 import * as loadash from "lodash";
 import ExpectedError from "../utils/expectedError";
+import Match from "../models/match/match";
 
 class PlayerService {
   async createPlayer(req: Request) {
@@ -49,7 +50,10 @@ class PlayerService {
 
   async getPlayerWithGivenID(playerID: number) {
     const playersRepository = await getConnection().getRepository(Player);
-    const player = await playersRepository.findOne({ id: playerID }, { relations: ["user"] });
+    const player = await playersRepository.findOne(
+      { id: playerID },
+      { relations: ["user"] }
+    );
 
     return player;
   }
@@ -61,9 +65,50 @@ class PlayerService {
       relations: ["user"]
     });
 
-    if (players.length <= 0) throw new ExpectedError("There is no player for given team!", 400);
+    if (players.length <= 0)
+      throw new ExpectedError("There is no player for given team!", 400);
 
     return players;
+  }
+
+  async getAllPlayersForMatch(matchID: number) {
+    const matchRepository = await getConnection().getRepository(Match);
+    const match = await matchRepository.findOne(
+      { id: matchID },
+      { relations: ["homeTeam", "awayTeam"] }
+    );
+    const playersRepository = await getConnection().getRepository(Player);
+    const homeTeamPlayers = await playersRepository.find({
+      where: { teamId: match.homeTeamId },
+      relations: ["user"]
+    });
+
+    const awayTeamPlayers = await playersRepository.find({
+      where: { teamId: match.awayTeamId },
+      relations: ["user"]
+    });
+
+    const mappedAwayTeamPlayers = awayTeamPlayers.map(atp => {
+      return {
+        id: atp.id,
+        firstName: atp.user.firstName,
+        secondName: atp.user.secondName,
+        number: atp.number
+      };
+    });
+    const mappedHomeTeamPlayers = homeTeamPlayers.map(htp => {
+      return {
+        id: htp.id,
+        firstName: htp.user.firstName,
+        secondName: htp.user.secondName,
+        number: htp.number
+      };
+    });
+
+    return {
+      homeTeam: mappedAwayTeamPlayers,
+      awayTeam: mappedHomeTeamPlayers
+    };
   }
 
   async getPlayerForUser(userID: number) {
@@ -91,7 +136,8 @@ class PlayerService {
     const player = await playersRepository.findOne({ id: playerID });
     const user = player.user;
 
-    if (!player) throw new ExpectedError("Player with given id does not exist", 400);
+    if (!player)
+      throw new ExpectedError("Player with given id does not exist", 400);
 
     await getConnection().manager.remove(player);
     await getConnection().manager.remove(user);
