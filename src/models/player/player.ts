@@ -32,6 +32,13 @@ export class Player {
   @JoinColumn()
   user: User;
 
+  @Column({nullable: true})
+  captainTeamId: number;
+
+  @OneToOne(type => Team, {nullable: true})
+  @JoinColumn({ name: "captainTeamId" })
+  captainTeam: Team;
+
   @Column({ nullable: true })
   public teamId: number;
 
@@ -46,12 +53,12 @@ export class Player {
         .max(99)
         .required(),
       position: Joi.string().equal([
-        "goalkeeper",
-        "defender",
-        "midfielder",
-        "striker"
+        "Bramkarz",
+        "Obrońca",
+        "Pomocnik",
+        "Napastnik"
       ]),
-      strongerFoot: Joi.string().equal(["left", "right", "both"])
+      strongerFoot: Joi.string().equal(["Prawa", "Lewa", "Obunożny"])
     };
 
     return Joi.validate(player, schema);

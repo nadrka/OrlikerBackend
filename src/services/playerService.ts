@@ -50,10 +50,7 @@ class PlayerService {
 
   async getPlayerWithGivenID(playerID: number) {
     const playersRepository = await getConnection().getRepository(Player);
-    const player = await playersRepository.findOne(
-      { id: playerID },
-      { relations: ["user"] }
-    );
+    const player = await playersRepository.findOne({ id: playerID }, { relations: ["user"] });
 
     return player;
   }
@@ -65,18 +62,14 @@ class PlayerService {
       relations: ["user"]
     });
 
-    if (players.length <= 0)
-      throw new ExpectedError("There is no player for given team!", 400);
+    if (players.length <= 0) throw new ExpectedError("There is no player for given team!", 400);
 
     return players;
   }
 
   async getAllPlayersForMatch(matchID: number) {
     const matchRepository = await getConnection().getRepository(Match);
-    const match = await matchRepository.findOne(
-      { id: matchID },
-      { relations: ["homeTeam", "awayTeam"] }
-    );
+    const match = await matchRepository.findOne({ id: matchID }, { relations: ["homeTeam", "awayTeam"] });
     const playersRepository = await getConnection().getRepository(Player);
     const homeTeamPlayers = await playersRepository.find({
       where: { teamId: match.homeTeamId },
@@ -124,10 +117,15 @@ class PlayerService {
 
   async updatePlayer(req: Request, senderId: number) {
     const playerRepository = await getConnection().getRepository(Player);
-    const player = await playerRepository.findOne({ id: senderId });
-    loadash.merge(player, req.body);
+    const player = await playerRepository.findOne({ id: senderId }, { relations: ["user"] });
+    player.number = req.body.number;
+    player.position = req.body.position;
+    player.strongerFoot = req.body.strongerFoot;
+    player.user.firstName = req.body.firstName;
+    player.user.secondName = req.body.secondName;
 
     await getConnection().manager.save(player);
+    await getConnection().manager.save(player.user);
     return player;
   }
 
@@ -136,8 +134,7 @@ class PlayerService {
     const player = await playersRepository.findOne({ id: playerID });
     const user = player.user;
 
-    if (!player)
-      throw new ExpectedError("Player with given id does not exist", 400);
+    if (!player) throw new ExpectedError("Player with given id does not exist", 400);
 
     await getConnection().manager.remove(player);
     await getConnection().manager.remove(user);
