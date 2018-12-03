@@ -32,10 +32,10 @@ export class Match {
   @Column({ nullable: true })
   public awayTeamResult: number;
 
-  @Column({ nullable: true })
+  @Column()
   public refereeId: number;
 
-  @OneToOne(type => User, { nullable: true })
+  @ManyToOne(type => User)
   @JoinColumn({})
   referee: User;
 
