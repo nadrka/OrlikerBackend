@@ -20,6 +20,13 @@ class UserService {
     this.saveUser(req, res);
   }
 
+  async getAllReferees() {
+    const userRepository = await getConnection().getRepository(User);
+    const referees = await userRepository.find({ role: "Referee" });
+
+    return referees;
+  }
+
   async saveUser(req: Request, res: Response) {
     const userRepository = await getConnection().getRepository(User);
     const userFromRequestBody: DeepPartial<User> = req.body;
