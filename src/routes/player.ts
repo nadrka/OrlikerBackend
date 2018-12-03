@@ -31,8 +31,13 @@ router.get("/:id", async (req: Request, res: Response) => {
 //autoryzacja
 //done
 router.put("/", auth, async (req: Request, res: Response) => {
-  let player = await playerService.updatePlayer(req, res.locals.senderId);
-  res.send(player);
+  try {
+    let player = await playerService.updatePlayer(req, res.locals.senderId);
+    res.send(player);
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
+  }
 });
 
 //autoryzacja

@@ -40,7 +40,6 @@ router.get("/:id/matches/played", async (req: Request, res: Response) => {
   res.send(matches);
 });
 router.get("/:id/matches/all", async (req: Request, res: Response) => {});
-router.get("/:id/teams", async (req: Request, res: Response) => {});
 router.get("/", async (req: Request, res: Response) => {
   let leagues = await leagueService.getLeagues();
   res.send(leagues);
