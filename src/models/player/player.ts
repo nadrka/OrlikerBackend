@@ -32,11 +32,7 @@ export class Player {
   @JoinColumn()
   user: User;
 
-  @Column({nullable: true})
-  captainTeamId: number;
-
-  @OneToOne(type => Team, {nullable: true})
-  @JoinColumn({ name: "captainTeamId" })
+  @OneToOne(type => Team, team => team.captain, {nullable: true})
   captainTeam: Team;
 
   @Column({ nullable: true })
