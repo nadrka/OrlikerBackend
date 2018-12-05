@@ -7,22 +7,29 @@ import PlayerService from "../services/playerService";
 import loadash from "lodash";
 import MatchService from "./matchService";
 import ExpectedError from "../utils/expectedError";
+import TeamService from "./teamService";
 
 class PlayerStatisticService {
   matchService = new MatchService();
   playerService = new PlayerService();
+  teamService = new TeamService();
 
   async createStatistic(req: Request) {
     const { error } = PlayerStatistic.validatePlayerStatistic(req.body);
     if (error) throw new ExpectedError(error.details[0].message, 400);
 
-    const playerStatisticRepository = await getConnection().getRepository(PlayerStatistic);
+    const playerStatisticRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
     const existingStatistic = await playerStatisticRepository.findOne({
       playerId: req.body.playerId,
       matchId: req.body.matchId
     });
     if (existingStatistic) {
-      throw new ExpectedError("Statistic for the player already exists in this match!", 400);
+      throw new ExpectedError(
+        "Statistic for the player already exists in this match!",
+        400
+      );
     }
     const playerStatistic = await playerStatisticRepository.create(req.body);
     await getConnection().manager.save(playerStatistic);
@@ -30,7 +37,9 @@ class PlayerStatisticService {
   }
 
   async getStatisticsForMatch(matchID: number) {
-    const playerStatisticRepository = await getConnection().getRepository(PlayerStatistic);
+    const playerStatisticRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
     const match = await this.matchService.getMatchForGivenID(matchID);
     const teamStatistics = await playerStatisticRepository.find({
       matchId: matchID
@@ -41,7 +50,9 @@ class PlayerStatisticService {
     });
     const awayTeamPlayersStatistics = await Promise.all(
       awayTeamStatistics.map(async c => {
-        const player = await this.playerService.getPlayerWithGivenID(c.playerId);
+        const player = await this.playerService.getPlayerWithGivenID(
+          c.playerId
+        );
         const x = {
           player: {
             position: player.position,
@@ -65,7 +76,9 @@ class PlayerStatisticService {
 
     const homeTeamPlayersStatistics = await Promise.all(
       homeTeamStatistics.map(async c => {
-        const player = await this.playerService.getPlayerWithGivenID(c.playerId);
+        const player = await this.playerService.getPlayerWithGivenID(
+          c.playerId
+        );
         const x = {
           player: {
             position: player.position,
@@ -97,7 +110,9 @@ class PlayerStatisticService {
   }
 
   async getStatisticsForTeam(teamId: number) {
-    const statisticsRepository = await getConnection().getRepository(PlayerStatistic);
+    const statisticsRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
     let statistics = await statisticsRepository.find({ teamId: teamId });
 
     var playerTeamStatistics = loadash(statistics)
@@ -113,7 +128,9 @@ class PlayerStatisticService {
 
     let data = await Promise.all(
       playerTeamStatistics.map(async statistic => {
-        const player = await this.playerService.getPlayerWithGivenID(statistic.playerId);
+        const player = await this.playerService.getPlayerWithGivenID(
+          statistic.playerId
+        );
         return {
           player: {
             id: player.id,
@@ -133,7 +150,9 @@ class PlayerStatisticService {
   }
 
   async getStatisticsForPlayer(playerID: number) {
-    const statisticsRepository = await getConnection().getRepository(PlayerStatistic);
+    const statisticsRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
     const statistics = await statisticsRepository.find({ playerId: playerID });
 
     var playerTeamStatistics = {
@@ -148,10 +167,18 @@ class PlayerStatisticService {
   }
 
   async getStatisticsForLeague(leagueID: number) {
-    const statisticsRepository = await getConnection().getRepository(PlayerStatistic);
-    let statistics = await statisticsRepository.find();
+    const statisticsRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
+    let statistics = await statisticsRepository.find({
+      relations: ["match"]
+    });
 
-    var playerTeamStatistics = loadash(statistics)
+    let filteredStatistics = statistics.filter(s => {
+      return s.match.leagueId == leagueID;
+    });
+
+    var playerTeamStatistics = loadash(filteredStatistics)
       .groupBy(c => c.playerId)
       .map((playerStatistics, id) => ({
         playerId: +id,
@@ -162,20 +189,44 @@ class PlayerStatisticService {
       }))
       .value();
 
-    const bestScorers = loadash(playerTeamStatistics)
+    const mappedPlayerTeamStatistics = await Promise.all(
+      playerTeamStatistics.map(async statistic => {
+        const player = await this.playerService.getPlayerWithGivenID(
+          statistic.playerId
+        );
+        const team = await this.teamService.getTeamForGivenId(player.teamId);
+        return {
+          player: {
+            id: statistic.playerId,
+            firstName: player.user.firstName,
+            secondName: player.user.secondName
+          },
+          team: {
+            id: team.id,
+            name: team.name
+          },
+          goals: statistic.goals,
+          assists: statistic.assists,
+          yellowCards: statistic.yellowCards,
+          redCards: statistic.redCards
+        };
+      })
+    );
+
+    const bestScorers = loadash(mappedPlayerTeamStatistics)
       .orderBy(c => c.goals, ["desc"])
       .take(3);
 
-    const bestAsistants = loadash(playerTeamStatistics)
+    const bestAsistants = loadash(mappedPlayerTeamStatistics)
       .orderBy(c => c.assists, ["desc"])
       .take(3);
 
-    const mostRedCards = loadash(playerTeamStatistics)
-      .orderBy(c => c.yellowCards, ["desc"])
+    const mostRedCards = loadash(mappedPlayerTeamStatistics)
+      .orderBy(c => c.redCards, ["desc"])
       .take(3);
 
-    const mostYellowCards = loadash(playerTeamStatistics)
-      .orderBy(c => c.redCards, ["desc"])
+    const mostYellowCards = loadash(mappedPlayerTeamStatistics)
+      .orderBy(c => c.yellowCards, ["desc"])
       .take(3);
 
     return {
@@ -187,24 +238,36 @@ class PlayerStatisticService {
   }
 
   async updateStatistic(req: Request) {
-    const playerStatisticRepository = await getConnection().getRepository(PlayerStatistic);
+    const playerStatisticRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
     const playerStatistic = await playerStatisticRepository.findOne({
       id: req.params.id
     });
 
-    if (!playerStatistic) throw new ExpectedError("Player's statistic with given id does not exist", 400);
+    if (!playerStatistic)
+      throw new ExpectedError(
+        "Player's statistic with given id does not exist",
+        400
+      );
 
     loadash.extend(playerStatistic, req.body);
     return playerStatistic;
   }
 
   async deleteStatistic(req: Request) {
-    const playerStatisticRepository = await getConnection().getRepository(PlayerStatistic);
+    const playerStatisticRepository = await getConnection().getRepository(
+      PlayerStatistic
+    );
     const playerStatistic = await playerStatisticRepository.findOne({
       id: req.params.id
     });
 
-    if (!playerStatistic) throw new ExpectedError("Player's statistic with given id does not exist", 400);
+    if (!playerStatistic)
+      throw new ExpectedError(
+        "Player's statistic with given id does not exist",
+        400
+      );
 
     await getConnection().manager.remove(playerStatistic);
   }
