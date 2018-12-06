@@ -10,6 +10,7 @@ import {
 import Joi from "joi";
 import Team from "../team/team";
 import League from "../league";
+import MatchPlace from "./matchPlace";
 
 @Entity()
 export class Match {
@@ -18,9 +19,6 @@ export class Match {
 
   @Column()
   public status: string = "Upcoming";
-
-  @Column()
-  public place: string;
 
   @Column()
   public matchDate: Date = new Date(1990, 1, 1);
@@ -34,10 +32,10 @@ export class Match {
   @Column({ nullable: true })
   public awayTeamResult: number;
 
-  @Column({ nullable: true })
+  @Column()
   public refereeId: number;
 
-  @OneToOne(type => User, { nullable: true })
+  @ManyToOne(type => User)
   @JoinColumn({})
   referee: User;
 
@@ -52,6 +50,12 @@ export class Match {
 
   @ManyToOne(type => Team)
   awayTeam: Team;
+
+  @Column()
+  public placeId: number;
+
+  @ManyToOne(type => MatchPlace)
+  place: MatchPlace;
 
   @Column()
   public leagueId: number;
@@ -87,7 +91,7 @@ export class Match {
         .optional(),
       matchDate: Joi.date().optional(),
       acceptMatchDate: Joi.date().optional(),
-      place: Joi.string().required()
+      placeId: Joi.number().required()
     };
 
     return Joi.validate(match, schema);

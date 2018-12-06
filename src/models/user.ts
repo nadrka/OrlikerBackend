@@ -27,10 +27,7 @@ export class User {
   public imgURL: string;
 
   generateAuthToken = function() {
-    const token = jwt.sign(
-      { id: this.id },
-      Config.get("jwtPrivateKey")
-    );
+    const token = jwt.sign({ id: this.id }, Config.get("jwtPrivateKey"));
     return token;
   };
 
@@ -44,6 +41,9 @@ export class User {
         .min(3)
         .max(50)
         .required(),
+      role: Joi.string()
+        .equal(["Referee", "Player", "Captain"])
+        .optional(),
       login: Joi.string()
         .min(3)
         .max(50)

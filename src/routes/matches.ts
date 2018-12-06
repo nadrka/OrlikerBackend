@@ -10,9 +10,10 @@ const playerStatisticService = new PlayerStatisticService();
 const playerService = new PlayerService();
 const matchService = new MatchService();
 //autoryzacja
-router.post("/", auth, async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const match = await matchService.createMatch(req, res.locals.senderId);
+    const match = await matchService.createMatch(req);
+    // const match = await matchService.createMatch(req, res.locals.senderId);
     res.send(match);
   } catch (error) {
     if (error instanceof ExpectedError)
