@@ -55,7 +55,7 @@ router.delete("/:id", async (req: Request, res: Response) => {
 router.get("/:id/invitations", async (req: Request, res: Response) => {
   try {
     const invitationService = new InvitationService();
-    const invitations = invitationService.getInvitationsForPlayer(req.params.id);
+    const invitations = await invitationService.getInvitationsForPlayer(req.params.id);
     res.send(invitations);
   } catch (error) {
     if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);

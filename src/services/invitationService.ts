@@ -26,6 +26,9 @@ class InvitationService {
     }
     const invitationReposistory = await getConnection().getRepository(Invitation);
     const invitation = await invitationReposistory.create(req.body);
+
+    await getConnection().manager.save(invitation);
+
     return invitation;
   }
 
@@ -40,6 +43,7 @@ class InvitationService {
     }
 
     await getConnection().manager.remove(invitation);
+    return true;
   }
 
   async acceptInvitation(req: Request) {
@@ -47,18 +51,22 @@ class InvitationService {
     const invitation = await invitationReposistory.findOne({
       id: req.params.id
     });
-
+    console.log(invitation);
     if (!invitation) {
+      console.log("bebe");
       throw new ExpectedError("Invitation with given id does not exists!", 400);
     }
 
     const playerService = new PlayerService();
-    const player = await playerService.getPlayerWithGivenID(invitation.id);
+    const player = await playerService.getPlayerWithGivenID(invitation.playerId);
+
     const teamService = new TeamService();
-    const team = await teamService.getTeamForGivenId(invitation.id);
+    const team = await teamService.getTeamForGivenId(invitation.teamId);
+
     player.teamId = invitation.teamId;
     player.team = team;
     playerService.updatePlayerWith(player);
+    await getConnection().manager.remove(invitation);
   }
 
   async getInvitationForTeam(req: Request) {
@@ -119,6 +127,13 @@ class InvitationService {
       };
     });
     return mappedInvitations;
+  }
+
+  async getAllInvitaitons() {
+    const invitationReposistory = await getConnection().getRepository(Invitation);
+    const invitations = await invitationReposistory.find();
+
+    return invitations;
   }
 }
 
