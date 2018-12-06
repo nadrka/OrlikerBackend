@@ -1,12 +1,5 @@
 import { User } from "./../user";
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  JoinColumn,
-  ManyToOne
-} from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne } from "typeorm";
 import Joi from "joi";
 import Team from "../team/team";
 import League from "../league";
@@ -62,7 +55,7 @@ export class Match {
   static validateMatch(match: Match) {
     const schema = {
       status: Joi.string()
-        .equal(["Upcoming", "Played"])
+        .equal(["ToAccept", "Upcoming", "Played", "Declined"])
         .optional(),
       awayTeamId: Joi.number()
         .min(1)

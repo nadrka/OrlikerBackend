@@ -16,7 +16,7 @@ class MatchService {
       .findOne({ captainId: senderId });
     if (!senderTeam) throw new ExpectedError("User is not captain of any team", 400);
     let matchData = {
-      status: "Upcoming",
+      status: "ToAccept",
       homeTeamId: senderTeam.id,
       awayTeamId: req.body.awayTeamId,
       place: req.body.place,
@@ -28,6 +28,73 @@ class MatchService {
     if (error) throw new ExpectedError(error.details[0].message, 400);
     await getConnection().manager.save(match);
     return match;
+  }
+
+  async getSentMatchInvites(senderId: number) {
+    const senderPlayer = await getConnection()
+      .getRepository(Player)
+      .findOne(senderId, { relations: ["captainTeam"] });
+    if (senderPlayer.captainTeam !== null) {
+      const matches = await getConnection()
+        .getRepository(Match)
+        .find({ where: { homeTeamId: senderPlayer.captainTeam.id, status: "ToAccept" }, relations: ["awayTeam"] });
+      let toReturn = matches.map(value => {
+        return { place: value.place, id: value.id, date: value.matchDate, teamName: value.awayTeam.name };
+      });
+      return toReturn;
+    } else {
+      throw new ExpectedError("User is not captain of any team!", 400);
+    }
+  }
+
+  async getReceivedMatchInvites(senderId: number) {
+    const senderPlayer = await getConnection()
+      .getRepository(Player)
+      .findOne(senderId, { relations: ["captainTeam"] });
+    if (senderPlayer.captainTeam !== null) {
+      const matches = await getConnection()
+        .getRepository(Match)
+        .find({ where: { awayTeamId: senderPlayer.captainTeam.id, status: "ToAccept" }, relations: ["homeTeam"] });
+      let toReturn = matches.map(value => {
+        return { place: value.place, id: value.id, date: value.matchDate, teamName: value.homeTeam.name };
+      });
+      return toReturn;
+    } else {
+      throw new ExpectedError("User is not captain of any team!", 400);
+    }
+  }
+
+  async acceptMatchInvite(senderId: number, matchId: number) {
+    const match = await getConnection()
+      .getRepository(Match)
+      .findOne(matchId);
+    const senderPlayer = await getConnection()
+      .getRepository(Player)
+      .findOne(senderId, { relations: ["captainTeam"] });
+    if (match.awayTeamId == senderPlayer.captainTeam.id && match.status === "ToAccept") {
+      match.status = "Upcoming";
+      await getConnection().manager.save(match);
+    } else {
+      throw new ExpectedError("Wrong parameters!", 400);
+    }
+  }
+
+  async cancelMatchInvite(senderId: number, matchId: number) {
+    const match = await getConnection()
+      .getRepository(Match)
+      .findOne(matchId);
+    const senderPlayer = await getConnection()
+      .getRepository(Player)
+      .findOne(senderId, { relations: ["captainTeam"] });
+    if (
+      (match.homeTeamId == senderPlayer.captainTeam.id || match.awayTeamId == senderPlayer.captainTeam.id) &&
+      match.status === "ToAccept"
+    ) {
+      match.status = "Declined";
+      await getConnection().manager.save(match);
+    } else {
+      throw new ExpectedError("Wrong parameters!", 400);
+    }
   }
 
   async getMatchForGivenID(matchID: number) {

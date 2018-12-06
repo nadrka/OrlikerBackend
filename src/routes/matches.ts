@@ -15,16 +15,52 @@ router.post("/", auth, async (req: Request, res: Response) => {
     const match = await matchService.createMatch(req, res.locals.senderId);
     res.send(match);
   } catch (error) {
-    if (error instanceof ExpectedError)
-      res.status(error.errorCode).send(error.message);
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
+  }
+});
+
+router.get("/sentInvites", auth, async (req: Request, res: Response) => {
+  try {
+    const matches = await matchService.getSentMatchInvites(res.locals.senderId);
+    res.send(matches);
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
+  }
+});
+
+router.get("/receivedInvites", auth, async (req: Request, res: Response) => {
+  try {
+    const matches = await matchService.getReceivedMatchInvites(res.locals.senderId);
+    res.send(matches);
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
+  }
+});
+
+router.post("/acceptInvite", auth, async (req: Request, res: Response) => {
+  try {
+    const matches = await matchService.acceptMatchInvite(res.locals.senderId, req.body.matchId);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
+  }
+});
+router.post("/cancelInvite", auth, async (req: Request, res: Response) => {
+  try {
+    const matches = await matchService.cancelMatchInvite(res.locals.senderId, req.body.matchId);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
     else res.status(500).send(error.message);
   }
 });
 
 router.get("/:id/statistics", async (req: Request, res: Response) => {
-  const statistcs = await playerStatisticService.getStatisticsForMatch(
-    req.params.id
-  );
+  const statistcs = await playerStatisticService.getStatisticsForMatch(req.params.id);
   res.send(statistcs);
 });
 router.get("/:id", async (req: Request, res: Response) => {
@@ -43,8 +79,7 @@ router.put("/:id", async (req: Request, res: Response) => {
     const match = await matchService.updateMatchWithRequestBody(req);
     res.send(match);
   } catch (error) {
-    if (error instanceof ExpectedError)
-      res.status(error.errorCode).send(error.message);
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
     else res.status(500).send(error.message);
   }
 });
@@ -54,8 +89,7 @@ router.put("/:id/result", async (req: Request, res: Response) => {
     const match = await matchService.updateMatchResult(req);
     res.send(match);
   } catch (error) {
-    if (error instanceof ExpectedError)
-      res.status(error.errorCode).send(error.message);
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
     else res.status(500).send(error.message);
   }
 });
@@ -65,8 +99,7 @@ router.delete("/:id", async (req: Request, res: Response) => {
     await matchService.deleteMatch(req);
     res.status(204).send();
   } catch (error) {
-    if (error instanceof ExpectedError)
-      res.status(error.errorCode).send(error.message);
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
     else res.status(500).send(error.message);
   }
 });
