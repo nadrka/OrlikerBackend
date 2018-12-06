@@ -8,9 +8,11 @@ const playerStatisticService = new PlayerStatisticService();
 router.post("/", async (req: Request, res: Response) => {
   try {
     const playerStatistic = await playerStatisticService.createStatistic(req);
-    return playerStatistic;
+
+    res.send(playerStatistic);
   } catch (error) {
-    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    if (error instanceof ExpectedError)
+      res.status(error.errorCode).send(error.message);
     else res.status(500).send(error.message);
   }
 });
@@ -20,7 +22,8 @@ router.put("/:id", async (req: Request, res: Response) => {
     const playerStatistic = await playerStatisticService.updateStatistic(req);
     res.send(playerStatistic);
   } catch (error) {
-    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    if (error instanceof ExpectedError)
+      res.status(error.errorCode).send(error.message);
     else res.status(500).send(error.message);
   }
 });
@@ -30,7 +33,8 @@ router.delete("/:id", async (req: Request, res: Response) => {
     await playerStatisticService.deleteStatistic(req);
     res.status(204).send();
   } catch (error) {
-    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    if (error instanceof ExpectedError)
+      res.status(error.errorCode).send(error.message);
     else res.status(500).send(error.message);
   }
 });
