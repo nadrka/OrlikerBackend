@@ -14,7 +14,6 @@ router.post("/", async (req: Request, res: Response) => {
   try {
     const match = await matchService.createMatch(req);
     // const match = await matchService.createMatch(req, res.locals.senderId);
-    console.log(match);
     res.send(match);
   } catch (error) {
     if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
