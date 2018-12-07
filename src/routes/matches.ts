@@ -52,7 +52,7 @@ router.post("/acceptInvite", auth, async (req: Request, res: Response) => {
 });
 router.post("/cancelInvite", auth, async (req: Request, res: Response) => {
   try {
-    const matches = await matchService.cancelMatchInvite(res.locals.senderId, req.body.matchId);
+    await matchService.cancelMatchInvite(res.locals.senderId, req.body.matchId);
     res.status(204).send();
   } catch (error) {
     if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);

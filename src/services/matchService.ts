@@ -17,7 +17,7 @@ class MatchService {
     // if (!senderTeam)
     //   throw new ExpectedError("User is not captain of any team", 400);
     let matchData = {
-      status: "Upcoming",
+      status: "ToAccept",
       homeTeamId: req.body.homeTeamId,
       awayTeamId: req.body.awayTeamId,
       placeId: req.body.placeId,
@@ -102,24 +102,13 @@ class MatchService {
 
   async getMatchForGivenID(matchID: number) {
     const matchRepository = await getConnection().getRepository(Match);
-    const match = await matchRepository.findOne(
-      { id: matchID },
-      { relations: ["homeTeam", "awayTeam"] }
-    );
+    const match = await matchRepository.findOne({ id: matchID }, { relations: ["homeTeam", "awayTeam"] });
 
     const leagueService = new LeagueService();
-    const leagueTeams = await leagueService.getTeamsFromGivenLeague(
-      match.homeTeam.currentLegueId
-    );
-    const homeTeamPosition = leagueTeams.findIndex(
-      elem => elem.id == match.homeTeamId
-    );
-    const leagueTeams2 = await leagueService.getTeamsFromGivenLeague(
-      match.awayTeam.currentLegueId
-    );
-    const awayTeamPosition = leagueTeams2.findIndex(
-      elem => elem.id == match.awayTeamId
-    );
+    const leagueTeams = await leagueService.getTeamsFromGivenLeague(match.homeTeam.currentLegueId);
+    const homeTeamPosition = leagueTeams.findIndex(elem => elem.id == match.homeTeamId);
+    const leagueTeams2 = await leagueService.getTeamsFromGivenLeague(match.awayTeam.currentLegueId);
+    const awayTeamPosition = leagueTeams2.findIndex(elem => elem.id == match.awayTeamId);
 
     return {
       homeTeam: {
@@ -304,8 +293,7 @@ class MatchService {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: req.params.id });
 
-    if (!match)
-      throw new ExpectedError("Match for given id does not exist!", 400);
+    if (!match) throw new ExpectedError("Match for given id does not exist!", 400);
     const reqBody = req.body;
     loadash.merge(match, reqBody);
     return match;
@@ -317,8 +305,7 @@ class MatchService {
     const teamRepository = await getConnection().getRepository(Team);
     const homeTeam = await teamRepository.findOne(match.homeTeamId);
     const awayTeam = await teamRepository.findOne(match.awayTeamId);
-    if (!match)
-      throw new ExpectedError("Match for given id does not exist!", 400);
+    if (!match) throw new ExpectedError("Match for given id does not exist!", 400);
     if (match.homeTeamResult != null && match.awayTeamResult != null) {
       homeTeam.matches--;
       awayTeam.matches--;
@@ -375,8 +362,7 @@ class MatchService {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: req.params.id });
 
-    if (!match)
-      throw new ExpectedError("Match for given id does not exist!", 400);
+    if (!match) throw new ExpectedError("Match for given id does not exist!", 400);
 
     await getConnection().manager.remove(match);
   }

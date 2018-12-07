@@ -5,6 +5,8 @@ import User from "../models/user";
 import * as loadash from "lodash";
 import ExpectedError from "../utils/expectedError";
 import Match from "../models/match/match";
+import { Team } from "../models/team/team";
+import { PLAYERS_IN_TEAMS } from "../startups/db";
 
 class PlayerService {
   async createPlayer(req: Request) {
@@ -21,6 +23,37 @@ class PlayerService {
     player.user = user;
     await getConnection().manager.save(player);
     return player;
+  }
+
+  async generatePlayerForUsers() {
+    const users = await getConnection()
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("player", "player", "player.userId = user.id")
+      .where("player.id IS NULL")
+      .getMany();
+    const teams = await getConnection()
+      .getRepository(Team)
+      .find();
+    var objectToInsert = [];
+    if (teams.length > 0) {
+      let teamIndex = 0;
+      for (var index = 0; index < users.length; ) {
+        for (var innerIndex = 0; innerIndex < PLAYERS_IN_TEAMS - 1; innerIndex++, index++)
+          objectToInsert.push({ user: users[index], team: teams[teamIndex] });
+        teamIndex++;
+      }
+    } else {
+      for (var index = 0; index < users.length; index++) {
+        objectToInsert.push({ user: users[index] });
+      }
+    }
+    await getConnection()
+      .createQueryBuilder()
+      .insert()
+      .into(Player)
+      .values(objectToInsert)
+      .execute();
   }
 
   async getAllPlayers(req: Request) {

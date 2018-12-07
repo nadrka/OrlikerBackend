@@ -1,14 +1,6 @@
 import { Team } from "./../team/team";
 import { User } from "./../user";
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  JoinColumn,
-  OneToMany,
-  ManyToOne
-} from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, OneToMany, ManyToOne } from "typeorm";
 import Joi from "joi";
 
 @Entity()
@@ -16,23 +8,23 @@ export class Player {
   @PrimaryGeneratedColumn("increment")
   public id: number;
 
-  @Column({ nullable: true })
+  @Column({ default: 0, nullable: true })
   public number: number = 0;
 
-  @Column()
+  @Column({ default: "" })
   public position: string = "";
 
-  @Column()
+  @Column({ default: "" })
   public strongerFoot: string = "";
 
-  @Column({ type: "datetime" })
+  @Column({ type: "datetime", nullable: true })
   public dateOfBirth: Date = new Date(1990, 1, 1);
 
   @OneToOne(type => User)
   @JoinColumn()
   user: User;
 
-  @OneToOne(type => Team, team => team.captain, {nullable: true})
+  @OneToOne(type => Team, team => team.captain, { nullable: true })
   captainTeam: Team;
 
   @Column({ nullable: true })
@@ -48,12 +40,7 @@ export class Player {
         .min(0)
         .max(99)
         .required(),
-      position: Joi.string().equal([
-        "Bramkarz",
-        "Obrońca",
-        "Pomocnik",
-        "Napastnik"
-      ]),
+      position: Joi.string().equal(["Bramkarz", "Obrońca", "Pomocnik", "Napastnik"]),
       strongerFoot: Joi.string().equal(["Prawa", "Lewa", "Obunożny"])
     };
 

@@ -1,3 +1,4 @@
+import { Player } from "../models/player/player";
 import { getConnection, DeepPartial } from "typeorm";
 import { Request, Response } from "express";
 import Team from "../models/team/team";
@@ -18,8 +19,7 @@ class TeamService {
       name: teamFromRequestBody.name
     });
 
-    if (teamWithName)
-      throw new ExpectedError("Team with given name already exists!", 400);
+    if (teamWithName) throw new ExpectedError("Team with given name already exists!", 400);
 
     const team = await teamRepository.create(teamFromRequestBody);
 
@@ -54,6 +54,32 @@ class TeamService {
     // }
   }
 
+  //do generowania bazy
+  async createTeamWithoutToken(name: string, currentLeague: number) {
+    const player = await getConnection()
+      .getRepository(Player)
+      .findOne({ where: { teamId: null } });
+    const teamRepository = await getConnection().getRepository(Team);
+    /* const teamWithName = await teamRepository.findOne({
+      name: name
+    });
+    if (teamWithName) throw new ExpectedError("Team with given name already exists!", 400); */
+
+    const team = await teamRepository.create({ name: name, currentLegueId: currentLeague, captainId: player.id });
+
+    /* const { error } = Team.validateTeam(team);
+    if (error) throw new ExpectedError(error.details[0].message, 400); */
+
+    const playerService = new PlayerService();
+
+    const savedTeam = await getConnection().manager.save(team);
+
+    player.team = savedTeam;
+    player.teamId = savedTeam.id;
+    await playerService.updatePlayerWith(player);
+    return team;
+  }
+
   async getTeamsForGivenLeague(leagueID: number) {
     const teamRepository = await getConnection().getRepository(Team);
     const teams = await teamRepository.find({ currentLegueId: leagueID });
@@ -82,9 +108,7 @@ class TeamService {
     );
     //get position
     const leagueService = new LeagueService();
-    const leagueTeams = await leagueService.getTeamsFromGivenLeague(
-      team.currentLegueId
-    );
+    const leagueTeams = await leagueService.getTeamsFromGivenLeague(team.currentLegueId);
     const position = leagueTeams.findIndex(elem => elem.id == teamID);
     const response = { ...team, position: position + 1 };
     /*let newestMatch;
@@ -126,13 +150,10 @@ class TeamService {
     //console.log(player);
     const teamsRepository = await getConnection().getRepository(Team);
     const team = await teamsRepository.findOne({ id: player.teamId });
-    if (!team)
-      throw new ExpectedError("Team with given id does not exist", 400);
-    if (team.captainId !== senderId)
-      throw new ExpectedError("User is not captain of a team", 400);
+    if (!team) throw new ExpectedError("Team with given id does not exist", 400);
+    if (team.captainId !== senderId) throw new ExpectedError("User is not captain of a team", 400);
     const teamWithName = await teamsRepository.findOne({ name: req.body.name });
-    if (teamWithName)
-      throw new ExpectedError("Team with given name already exist", 400);
+    if (teamWithName) throw new ExpectedError("Team with given name already exist", 400);
     loadash.merge(team, req.body);
     await getConnection().manager.save(team);
     return team;
@@ -142,18 +163,10 @@ class TeamService {
     const playerService = new PlayerService();
     const player = await playerService.getPlayerWithGivenID(senderId);
     const teamsRepository = await getConnection().getRepository(Team);
-    const team = await teamsRepository.findOne(
-      { id: player.teamId },
-      { relations: ["players"] }
-    );
+    const team = await teamsRepository.findOne({ id: player.teamId }, { relations: ["players"] });
 
-    if (team.players.length > 1)
-      throw new ExpectedError(
-        "Deleting team with more than one player is forbiden!",
-        400
-      );
-    if (!team)
-      throw new ExpectedError("Team with given id does not exist", 400);
+    if (team.players.length > 1) throw new ExpectedError("Deleting team with more than one player is forbiden!", 400);
+    if (!team) throw new ExpectedError("Team with given id does not exist", 400);
 
     player.teamId = null;
     await getConnection().manager.save(player);

@@ -6,6 +6,14 @@ import { DeepPartial, getConnection } from "typeorm";
 import PlayerService from "./playerService";
 import ExpectedError from "../utils/expectedError";
 
+interface credentialsObject {
+  firstName: string;
+  secondName: string;
+  login: string;
+  password: string;
+  role?: string;
+}
+
 class UserService {
   async createUser(req: Request, res: Response) {
     const { error } = User.validateUser(req.body);
@@ -18,6 +26,55 @@ class UserService {
     });
     if (existingUser) throw new ExpectedError("User already exist", 400);
     this.saveUser(req, res);
+  }
+
+  //do generowania bazy
+  async generateUser(login: string, password: string, firstName: string, lastName: string) {
+    const userRepository = await getConnection().getRepository(User);
+    /* const existingUser = await userRepository.findOne({
+      login: login
+    });
+    if (existingUser) throw new ExpectedError("User already exist", 404); */
+
+    let user = await userRepository.create({
+      login: login,
+      password: password,
+      firstName: firstName,
+      secondName: lastName
+    });
+
+    /*const { error } = User.validateUser(user);
+    if (error) throw new ExpectedError(error.details[0].message, 400);*/
+
+    const salt = await bcrypt.genSalt(3);
+    user.password = await bcrypt.hash(user.password, salt);
+
+    await getConnection().manager.insert(User, user);
+
+    /* const playerService = new PlayerService();
+    const player = await playerService.createPlayerForUser(user); */
+    // return player;
+  }
+
+  async generateManyUsers(credentials: Array<credentialsObject>, referee: boolean) {
+    var finalCredentialsObject: Array<credentialsObject> = [];
+    for (var index = 0; index < credentials.length; index++) {
+      let currentCredentials = credentials[index];
+      const salt = await bcrypt.genSalt(3);
+      currentCredentials.password = await bcrypt.hash(currentCredentials.password, salt);
+      if (referee) currentCredentials.role = "Referee";
+      finalCredentialsObject.push(currentCredentials);
+    }
+    await getConnection()
+      .createQueryBuilder()
+      .insert()
+      .into(User)
+      .values(finalCredentialsObject)
+      .execute();
+    if (!referee) {
+      const playerService = new PlayerService();
+      await playerService.generatePlayerForUsers();
+    }
   }
 
   async getAllReferees() {

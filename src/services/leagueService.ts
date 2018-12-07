@@ -5,12 +5,14 @@ import { League } from "../models/league";
 import ExpectedError from "../utils/expectedError";
 
 class LeagueService {
-  async createLeague(req: Request) {
-    const { error } = League.validateLeague(req.body);
-    if (error) throw new ExpectedError(error.details[0].message, 400);
-
+  async createLeague() {
+    const leagues = await getConnection().manager.find(League, { order: { leagueNumber: "DESC" }, skip: 0, take: 1 });
+    let leagueNumber = 1;
+    if (leagues[0]) leagueNumber = leagues[0].leagueNumber + 1;
     const leagueRepository = await getConnection().getRepository(League);
-    const league = await leagueRepository.create(req.body);
+    const league = await leagueRepository.create({ leagueNumber: leagueNumber });
+    const { error } = League.validateLeague(league);
+    if (error) throw new ExpectedError(error.details[0].message, 400);
     await getConnection().manager.save(league);
     return league;
   }

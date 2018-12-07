@@ -11,7 +11,7 @@ const matchesService = new MatchService();
 //autoryzacja
 router.post("/", async (req: Request, res: Response) => {
   try {
-    let league = await leagueService.createLeague(req);
+    let league = await leagueService.createLeague();
     res.send(league);
   } catch (error) {
     if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
