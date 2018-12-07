@@ -162,6 +162,15 @@ class PlayerService {
     return player;
   }
 
+  async updatePlayerImage(imgURL: string, senderId: number) {
+    const playerRepository = await getConnection().getRepository(Player);
+    const player = await playerRepository.findOne({ id: senderId }, { relations: ["user"] });
+    player.user.imgURL = imgURL;
+    await getConnection().manager.save(player);
+    await getConnection().manager.save(player.user);
+    return player;
+  }
+
   async deletePlayerWithGivenID(playerID: number) {
     const playersRepository = await getConnection().getRepository(Player);
     const player = await playersRepository.findOne({ id: playerID });
