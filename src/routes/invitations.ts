@@ -17,4 +17,24 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/:id/accept", async (req: Request, res: Response) => {
+  try {
+    const invitation = await invitationService.acceptInvitation(req);
+    res.send(invitation);
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
+  }
+});
+
+router.post("/:id/reject", async (req: Request, res: Response) => {
+  try {
+    const invitation = await invitationService.rejectInvitation(req);
+    res.send(invitation);
+  } catch (error) {
+    if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
+    else res.status(500).send(error.message);
+  }
+});
+
 export default router;

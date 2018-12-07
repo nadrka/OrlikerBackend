@@ -20,13 +20,15 @@ class MatchService {
       status: "ToAccept",
       homeTeamId: req.body.homeTeamId,
       awayTeamId: req.body.awayTeamId,
+      matchDate: req.body.matchDate,
       placeId: req.body.placeId,
       leagueId: req.body.leagueId,
       refereeId: req.body.refereeId
     };
-    console.log("ROBIE MECZ");
+    console.log(matchData);
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.create(matchData);
+
     const { error } = Match.validateMatch(match);
     if (error) throw new ExpectedError(error.details[0].message, 400);
     await getConnection().manager.save(match);
@@ -102,7 +104,10 @@ class MatchService {
 
   async getMatchForGivenID(matchID: number) {
     const matchRepository = await getConnection().getRepository(Match);
-    const match = await matchRepository.findOne({ id: matchID }, { relations: ["homeTeam", "awayTeam"] });
+    const match = await matchRepository.findOne(
+      { id: matchID },
+      { relations: ["homeTeam", "awayTeam", "referee", "place"] }
+    );
 
     const leagueService = new LeagueService();
     const leagueTeams = await leagueService.getTeamsFromGivenLeague(match.homeTeam.currentLegueId);
@@ -123,12 +128,16 @@ class MatchService {
         result: match.awayTeamResult,
         position: awayTeamPosition + 1
       },
-      place: match.place,
+      place: match.place.place,
       status: match.status,
       matchDate: match.matchDate,
       acceptMatchDate: match.acceptMatchDate,
       leagueId: match.leagueId,
-      refereeId: match.refereeId
+      referee: {
+        id: match.refereeId,
+        firstName: match.referee.firstName,
+        secondName: match.referee.secondName
+      }
     };
   }
 
@@ -292,10 +301,12 @@ class MatchService {
   async updateMatchWithRequestBody(req: Request) {
     const matchRepository = await getConnection().getRepository(Match);
     const match = await matchRepository.findOne({ id: req.params.id });
-
+    console.log(match);
     if (!match) throw new ExpectedError("Match for given id does not exist!", 400);
     const reqBody = req.body;
     loadash.merge(match, reqBody);
+    console.log(match.id);
+    await getConnection().manager.save(match);
     return match;
   }
 
