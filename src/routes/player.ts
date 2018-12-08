@@ -1,3 +1,4 @@
+import moment from "moment";
 import express, { Response, Request } from "express";
 import PlayerService from "../services/playerService";
 import InvitationService from "../services/invitationService";
@@ -13,7 +14,7 @@ const storage = multer.diskStorage({
     cb(null, "./uploads/");
   },
   filename: function(req, file, cb) {
-    cb(null, new Date().toISOString() + file.originalname);
+    cb(null, moment(new Date().toISOString()).format("DD.MM.YYYY.HH.mm.ss") + file.originalname);
   }
 });
 
