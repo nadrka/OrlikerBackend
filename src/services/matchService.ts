@@ -132,13 +132,15 @@ class MatchService {
         id: match.homeTeamId,
         name: match.homeTeam.name,
         result: match.homeTeamResult,
-        position: homeTeamPosition + 1
+        position: homeTeamPosition + 1,
+        imgURL: match.homeTeam.imgURL
       },
       awayTeam: {
         id: match.awayTeamId,
         name: match.awayTeam.name,
         result: match.awayTeamResult,
-        position: awayTeamPosition + 1
+        position: awayTeamPosition + 1,
+        imgURL: match.awayTeam.imgURL
       },
       place: match.place.place,
       status: match.status,
