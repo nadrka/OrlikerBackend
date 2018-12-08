@@ -53,7 +53,8 @@ class PlayerStatisticService {
             position: player.position,
             firstName: player.user.firstName,
             secondName: player.user.secondName,
-            number: player.number
+            number: player.number,
+            imgURL: player.user.imgURL
           },
           goals: c.goals,
           assists: c.assists,
@@ -77,7 +78,8 @@ class PlayerStatisticService {
             position: player.position,
             firstName: player.user.firstName,
             secondName: player.user.secondName,
-            number: player.number
+            number: player.number,
+            imgURL: player.user.imgURL
           },
           goals: c.goals,
           assists: c.assists,
@@ -125,7 +127,8 @@ class PlayerStatisticService {
             id: player.id,
             firstName: player.user.firstName,
             secondName: player.user.secondName,
-            number: player.number
+            number: player.number,
+            imgURL: player.user.imgURL
           },
           goals: statistic.goalSum,
           assists: statistic.assistSum,
@@ -182,7 +185,8 @@ class PlayerStatisticService {
           player: {
             id: statistic.playerId,
             firstName: player.user.firstName,
-            secondName: player.user.secondName
+            secondName: player.user.secondName,
+            imgURL: player.user.imgURL
           },
           team: {
             id: team.id,

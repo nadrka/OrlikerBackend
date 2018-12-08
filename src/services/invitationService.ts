@@ -93,7 +93,8 @@ class InvitationService {
             id: invitation.playerId,
             firstName: player.user.firstName,
             secondName: player.user.secondName,
-            number: player.number
+            number: player.number,
+            imgURL: player.user.imgURL
           }
         };
       })
@@ -122,7 +123,8 @@ class InvitationService {
         team: {
           id: invitation.teamId,
           name: invitation.team.name,
-          league: invitation.team.currentLegueId
+          league: invitation.team.currentLegueId,
+          imgURL: invitation.team.imgURL
         }
       };
     });
