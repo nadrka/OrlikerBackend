@@ -293,6 +293,80 @@ class MatchService {
     return data;
   }
 
+  async getUpcomingMatchesForReferee(refereeId: number) {
+    const matchRepository = await getConnection().getRepository(Match);
+
+    let upcomingMatches = await matchRepository.find({
+      where: { refereeId: refereeId, status: "Upcoming" },
+      order: {
+        matchDate: "ASC"
+      }
+    });
+    const teamService = new TeamService();
+
+    const data = await Promise.all(
+      upcomingMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
+    );
+    return data;
+  }
+
+  async getPlayedMatchesForReferee(refereeId: number) {
+    const matchRepository = await getConnection().getRepository(Match);
+    let playedMatches = await matchRepository.find({
+      where: { status: "Played", refereeId: refereeId },
+      order: {
+        matchDate: "DESC"
+      }
+    });
+
+    const teamService = new TeamService();
+
+    const data = await Promise.all(
+      playedMatches.map(async match => {
+        const homeTeam = await teamService.getTeamForGivenId(match.homeTeamId);
+        const awayTeam = await teamService.getTeamForGivenId(match.awayTeamId);
+        return {
+          id: match.id,
+          matchDate: match.matchDate,
+          leagueId: match.leagueId,
+          homeTeam: {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            imgURL: homeTeam.imgURL,
+            result: match.homeTeamResult
+          },
+          awayTeam: {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            imgURL: awayTeam.imgURL,
+            result: match.awayTeamResult
+          }
+        };
+      })
+    );
+    return data;
+  }
+
   async updateMatch(match: Match) {
     await getConnection().manager.save(match);
     return match;

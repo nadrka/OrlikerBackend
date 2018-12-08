@@ -110,6 +110,15 @@ class UserService {
     user.imgURL = updatedUser.imgURL;
     await getConnection().manager.save(user);
   }
+
+  async updateUserWithParams(id: number, firstName: string, secondName: string, imgUrl: string) {
+    const userRepository = await getConnection().getRepository(User);
+    const user = await userRepository.findOne(id);
+    if (firstName) user.firstName = firstName;
+    if (secondName) user.secondName = secondName;
+    if (imgUrl) user.imgURL = imgUrl;
+    await getConnection().manager.save(user);
+  }
 }
 
 export default UserService;

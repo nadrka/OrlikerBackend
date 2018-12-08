@@ -28,6 +28,7 @@ router.post("/", async (req: Request, res: Response) => {
   const player = await playerService.getPlayerForUser(existingUser.id);
   let data = {
     token: token,
+    id: existingUser.id,
     firstName: existingUser.firstName,
     secondName: existingUser.secondName,
     role: existingUser.role
