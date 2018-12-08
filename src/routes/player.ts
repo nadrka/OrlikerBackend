@@ -63,8 +63,8 @@ router.put("/", auth, async (req: Request, res: Response) => {
   }
 });
 
-router.put("/image", upload.single("userImage"), async (req: Request, res: Response) => {
-  const player = await playerService.updatePlayerImage(req.file.path, 1);
+router.put("/image", auth, upload.single("userImage"), async (req: Request, res: Response) => {
+  const player = await playerService.updatePlayerImage(req.file.path, res.locals.senderId);
   res.send(player);
 });
 

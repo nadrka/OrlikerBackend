@@ -12,7 +12,7 @@ export class Team {
   public name: string;
 
   @Column({ nullable: true })
-  public imgURL: string;
+  public imgURL: string = "uploads/team-logo-placeholder.png";
 
   @Column()
   public matches: number = 0;

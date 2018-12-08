@@ -107,8 +107,8 @@ router.put("/", auth, async (req: Request, res: Response) => {
   }
 });
 
-router.put("/image", upload.single("teamImage"), async (req: Request, res: Response) => {
-  const team = await teamService.updateTeamImage(req.file.path, 1);
+router.put("/image", auth, upload.single("teamImage"), async (req: Request, res: Response) => {
+  const team = await teamService.updateTeamImage(req.file.path, res.locals.senderId);
   res.send(team);
 });
 

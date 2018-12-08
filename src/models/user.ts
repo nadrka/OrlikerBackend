@@ -24,7 +24,7 @@ export class User {
   public role: string;
 
   @Column({ nullable: true })
-  public imgURL: string;
+  public imgURL: string = "uploads/user-image-placeholder.png";
 
   generateAuthToken = function() {
     const token = jwt.sign({ id: this.id }, Config.get("jwtPrivateKey"));
