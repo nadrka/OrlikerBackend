@@ -159,6 +159,20 @@ class TeamService {
     return team;
   }
 
+  async updateTeamImage(imgURL: string, senderId: number) {
+    const playerService = new PlayerService();
+    const player = await playerService.getPlayerWithGivenID(senderId);
+    //console.log(player);
+    const teamsRepository = await getConnection().getRepository(Team);
+    const team = await teamsRepository.findOne({ id: player.teamId });
+    if (!team) throw new ExpectedError("Team with given id does not exist", 400);
+    if (team.captainId !== senderId) throw new ExpectedError("User is not captain of a team", 400);
+    team.imgURL = imgURL;
+
+    await getConnection().manager.save(team);
+    return team;
+  }
+
   async deleteTeamWithGivenID(senderId: number) {
     const playerService = new PlayerService();
     const player = await playerService.getPlayerWithGivenID(senderId);

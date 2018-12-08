@@ -4,9 +4,32 @@ import InvitationService from "../services/invitationService";
 import PlayerStatisticService from "../services/playerStatisticService";
 import auth from "../middlewares/auth";
 import ExpectedError from "../utils/expectedError";
-
 const router = express.Router();
 const playerService = new PlayerService();
+
+import multer from "multer";
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, "./uploads/");
+  },
+  filename: function(req, file, cb) {
+    cb(null, new Date().toISOString() + file.originalname);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 8
+  },
+  fileFilter: function(req, file, cb) {
+    if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  }
+});
 
 router.post("/", async (req: Request, res: Response) => {
   const player = await playerService.createPlayer(req);
@@ -38,6 +61,11 @@ router.put("/", auth, async (req: Request, res: Response) => {
     if (error instanceof ExpectedError) res.status(error.errorCode).send(error.message);
     else res.status(500).send(error.message);
   }
+});
+
+router.put("/image", auth, upload.single("userImage"), async (req: Request, res: Response) => {
+  const player = await playerService.updatePlayerImage(req.file.path, res.locals.senderId);
+  res.send(player);
 });
 
 //autoryzacja
