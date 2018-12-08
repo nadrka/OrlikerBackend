@@ -44,7 +44,13 @@ class MatchService {
         .getRepository(Match)
         .find({ where: { homeTeamId: senderPlayer.captainTeam.id, status: "ToAccept" }, relations: ["awayTeam"] });
       let toReturn = matches.map(value => {
-        return { place: value.place, id: value.id, date: value.matchDate, teamName: value.awayTeam.name };
+        return {
+          place: value.place,
+          id: value.id,
+          date: value.matchDate,
+          teamName: value.awayTeam.name,
+          imgURL: value.awayTeam.imgURL
+        };
       });
       return toReturn;
     } else {
@@ -61,7 +67,13 @@ class MatchService {
         .getRepository(Match)
         .find({ where: { awayTeamId: senderPlayer.captainTeam.id, status: "ToAccept" }, relations: ["homeTeam"] });
       let toReturn = matches.map(value => {
-        return { place: value.place, id: value.id, date: value.matchDate, teamName: value.homeTeam.name };
+        return {
+          place: value.place,
+          id: value.id,
+          date: value.matchDate,
+          teamName: value.homeTeam.name,
+          imgURL: value.homeTeam.imgURL
+        };
       });
       return toReturn;
     } else {
@@ -120,13 +132,15 @@ class MatchService {
         id: match.homeTeamId,
         name: match.homeTeam.name,
         result: match.homeTeamResult,
-        position: homeTeamPosition + 1
+        position: homeTeamPosition + 1,
+        imgURL: match.homeTeam.imgURL
       },
       awayTeam: {
         id: match.awayTeamId,
         name: match.awayTeam.name,
         result: match.awayTeamResult,
-        position: awayTeamPosition + 1
+        position: awayTeamPosition + 1,
+        imgURL: match.awayTeam.imgURL
       },
       place: match.place.place,
       status: match.status,
