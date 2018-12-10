@@ -1,12 +1,13 @@
 import { getConnection } from "typeorm";
 import { Request, Response } from "express";
-import Player from "../models/player/player";
+import Player, { POSITION_OPTIONS } from "../models/player/player";
 import User from "../models/user";
 import * as loadash from "lodash";
 import ExpectedError from "../utils/expectedError";
 import Match from "../models/match/match";
 import { Team } from "../models/team/team";
 import { PLAYERS_IN_TEAMS } from "../startups/db";
+import { randomIntFromMinMax } from "../utils/commonFunctions";
 
 class PlayerService {
   async createPlayer(req: Request) {
@@ -39,13 +40,18 @@ class PlayerService {
     if (teams.length > 0) {
       let teamIndex = 0;
       for (var index = 0; index < users.length; ) {
-        for (var innerIndex = 0; innerIndex < PLAYERS_IN_TEAMS - 1; innerIndex++, index++)
-          objectToInsert.push({ user: users[index], team: teams[teamIndex] });
+        for (var innerIndex = 0; innerIndex < PLAYERS_IN_TEAMS - 1 && index < users.length; innerIndex++, index++)
+          objectToInsert.push({
+            user: users[index],
+            team: teamIndex < teams.length ? teams[teamIndex] : null,
+            position: innerIndex == 0 ? POSITION_OPTIONS[0] : POSITION_OPTIONS[randomIntFromMinMax(1, 3)],
+            number: randomIntFromMinMax(1, 99)
+          });
         teamIndex++;
       }
     } else {
       for (var index = 0; index < users.length; index++) {
-        objectToInsert.push({ user: users[index] });
+        objectToInsert.push({ user: users[index], position: POSITION_OPTIONS[randomIntFromMinMax(0, 3)] });
       }
     }
     await getConnection()

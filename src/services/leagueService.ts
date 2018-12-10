@@ -22,6 +22,17 @@ class LeagueService {
     return leagues;
   }
 
+  async getTeamsWithoutSort(leagueID: number) {
+    const leaguesRepository = await getConnection().getRepository(League);
+    const league = await leaguesRepository.findOne({ id: leagueID }, { relations: ["teams"] });
+
+    if (!league) throw new ExpectedError("League with given id does not exist", 400);
+
+    let teams = league.teams;
+
+    return teams;
+  }
+
   async getTeamsFromGivenLeague(leagueID: number) {
     const leaguesRepository = await getConnection().getRepository(League);
     const league = await leaguesRepository.findOne({ id: leagueID }, { relations: ["teams"] });
@@ -33,8 +44,9 @@ class LeagueService {
       teams,
       [
         "points",
+        // "scoredGoals"
         team => {
-          team.scoredGoals - team.concedeGoals;
+          return team.scoredGoals - team.concedeGoals;
         }
       ],
       ["desc", "desc"]

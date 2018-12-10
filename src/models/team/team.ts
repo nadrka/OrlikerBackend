@@ -11,7 +11,7 @@ export class Team {
   @Column()
   public name: string;
 
-  @Column({ nullable: true })
+  @Column({ default: "uploads/team-logo-placeholder.png", nullable: true })
   public imgURL: string = "uploads/team-logo-placeholder.png";
 
   @Column()

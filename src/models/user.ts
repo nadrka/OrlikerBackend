@@ -23,7 +23,7 @@ export class User {
   @Column({ default: "Player" })
   public role: string;
 
-  @Column({ nullable: true })
+  @Column({ default: "uploads/user-image-placeholder.jpg", nullable: true })
   public imgURL: string = "uploads/user-image-placeholder.jpg";
 
   generateAuthToken = function() {

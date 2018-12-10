@@ -6,6 +6,9 @@ import UserService from "../services/userService";
 import ExpectedError from "../utils/expectedError";
 import PlayerService from "../services/playerService";
 import PlacesService from "../services/placesService";
+import MatchService from "../services/matchService";
+import { randomIntFromMinMax } from "../utils/commonFunctions";
+import PlayerStatisticService from "../services/playerStatisticService";
 
 const NAMES = `Jan
 Andrzej
@@ -223,10 +226,6 @@ const placesNamesArr = PLACES_NAMES.split(" ");
 const NUMBER_OF_REFEREES = 15;
 const NUMBER_OF_PLACES = 10;
 
-function randomIntFromMinMax(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
 function generateRandomCredentials(alreadyChosenArr: Array<string>) {
   let randomName = nameArr[randomIntFromMinMax(0, nameArr.length - 1)];
   let randomSurname = surnamesArr[randomIntFromMinMax(0, surnamesArr.length - 1)];
@@ -243,8 +242,9 @@ async function generateInitialData() {
   const leagueService = new LeagueService();
   const teamService = new TeamService();
   const userService = new UserService();
-  const playerService = new PlayerService();
+  const matchService = new MatchService();
   const placesService = new PlacesService();
+  const playerStatisticService = new PlayerStatisticService();
   var listOfLogins: Array<string> = [];
   let time = moment();
   var randomCredentials = [];
@@ -283,6 +283,9 @@ async function generateInitialData() {
     referees.push(credentials);
   }
   await userService.generateManyUsers(referees, true);
+  await matchService.generateMatches();
+  await teamService.updateTeams();
+  await playerStatisticService.generateStatisticsForMatches();
   console.log("generowanie zajelo: " + moment().diff(time, "second") + " sekund");
 }
 
@@ -292,8 +295,9 @@ function startDatabase() {
       console.log("Connecting to database was succesfull!");
       // await deleteDatabase(connection);
       // await generateInitialData();
-      // console.log("Generating data was succesfull!");
-      // console.log("done");
+      // await genereteStatsOnly();
+      console.log("Generating data was succesfull!");
+      console.log("done");
     })
     .catch(error => console.log(error));
 }

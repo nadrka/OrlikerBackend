@@ -3,6 +3,8 @@ import { User } from "./../user";
 import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, OneToMany, ManyToOne } from "typeorm";
 import Joi from "joi";
 
+export const POSITION_OPTIONS = ["Bramkarz", "Obrońca", "Pomocnik", "Napastnik"];
+
 @Entity()
 export class Player {
   @PrimaryGeneratedColumn("increment")
@@ -40,7 +42,7 @@ export class Player {
         .min(0)
         .max(99)
         .required(),
-      position: Joi.string().equal(["Bramkarz", "Obrońca", "Pomocnik", "Napastnik"]),
+      position: Joi.string().equal(POSITION_OPTIONS),
       strongerFoot: Joi.string().equal(["Prawa", "Lewa", "Obunożny"])
     };
 

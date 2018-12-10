@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import PlayerService from "../services/playerService";
 import jwt from "jsonwebtoken";
 import config from "config";
+import TeamService from "services/teamService";
 const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
@@ -26,6 +27,8 @@ router.post("/", async (req: Request, res: Response) => {
 
   const playerService = new PlayerService();
   const player = await playerService.getPlayerForUser(existingUser.id);
+  const teamService = new TeamService();
+  const team = await teamService.getTeamForGivenId(player.teamId);
   let data = {
     token: token,
     id: existingUser.id,
@@ -35,7 +38,8 @@ router.post("/", async (req: Request, res: Response) => {
   };
   if (player)
     Object.assign(data, player, {
-      isCaptain: player.captainTeam !== null
+      isCaptain: player.captainTeam !== null,
+      teamName: team.name
     });
   res.send(data);
 });

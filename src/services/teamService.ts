@@ -7,6 +7,7 @@ import loadash from "lodash";
 import { Match } from "../models/match/match";
 import LeagueService from "../services/leagueService";
 import ExpectedError from "../utils/expectedError";
+import MatchService from "../services/matchService";
 class TeamService {
   async createTeam(req: Request) {
     const { error } = Team.validateTeam(req.body);
@@ -74,10 +75,49 @@ class TeamService {
 
     const savedTeam = await getConnection().manager.save(team);
 
-    player.team = savedTeam;
     player.teamId = savedTeam.id;
-    await playerService.updatePlayerWith(player);
+    await getConnection()
+      .getRepository(Player)
+      .update(player.id, player);
     return team;
+  }
+
+  //do generowania bazy
+  async updateTeams() {
+    const teamRepository = getConnection().getRepository(Team);
+    const teams = await teamRepository.find();
+    var matchService = new MatchService();
+    for (var teamIndex = 0; teamIndex < teams.length; teamIndex++) {
+      let wins = 0,
+        draws = 0,
+        loses = 0,
+        scoredGoals = 0,
+        concedeGoals = 0;
+      let matches = await matchService.getPlayedMatchesForTeam(teams[teamIndex].id);
+      for (var matchIndex = 0; matchIndex < matches.length; matchIndex++) {
+        if (matches[matchIndex].homeTeam.id == teams[teamIndex].id) {
+          if (matches[matchIndex].homeTeam.result > matches[matchIndex].awayTeam.result) wins++;
+          else if (matches[matchIndex].homeTeam.result == matches[matchIndex].awayTeam.result) draws++;
+          else loses++;
+          scoredGoals += matches[matchIndex].homeTeam.result;
+          concedeGoals += matches[matchIndex].awayTeam.result;
+        } else {
+          if (matches[matchIndex].homeTeam.result > matches[matchIndex].awayTeam.result) loses++;
+          else if (matches[matchIndex].homeTeam.result == matches[matchIndex].awayTeam.result) draws++;
+          else wins++;
+          scoredGoals += matches[matchIndex].awayTeam.result;
+          concedeGoals += matches[matchIndex].homeTeam.result;
+        }
+      }
+      teams[teamIndex].matches = matches.length;
+      teams[teamIndex].wins = wins;
+      teams[teamIndex].draws = draws;
+      teams[teamIndex].loses = loses;
+      teams[teamIndex].scoredGoals = scoredGoals;
+      teams[teamIndex].concedeGoals = concedeGoals;
+      teams[teamIndex].points = wins * 3 + draws;
+      teamRepository.update(teams[teamIndex].id, teams[teamIndex]);
+    }
   }
 
   async getTeamsForGivenLeague(leagueID: number) {

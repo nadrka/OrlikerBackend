@@ -8,6 +8,10 @@ import TeamService from "./teamService";
 import { Team } from "../models/team/team";
 import LeagueService from "./leagueService";
 import ExpectedError from "../utils/expectedError";
+import moment from "moment";
+import { randomIntFromMinMax } from "../utils/commonFunctions";
+import UserService from "../services/userService";
+import PlacesService from "../services/placesService";
 
 class MatchService {
   async createMatch(req: Request) {
@@ -33,6 +37,45 @@ class MatchService {
     if (error) throw new ExpectedError(error.details[0].message, 400);
     await getConnection().manager.save(match);
     return match;
+  }
+
+  async generateMatches() {
+    const leagueService = new LeagueService();
+    const leagues = await leagueService.getLeagues();
+    const userService = new UserService();
+    const referees = await userService.getAllReferees();
+    const placesService = new PlacesService();
+    const places = await placesService.getPlaces();
+    var matchArray = [];
+    for (var leagueIndex = 0; leagueIndex < leagues.length; leagueIndex++) {
+      let teams = await leagueService.getTeamsWithoutSort(leagues[leagueIndex].id);
+      for (var teamIndex = 0; teamIndex < teams.length; teamIndex++) {
+        for (var innerIndex = teamIndex + 1; innerIndex < teams.length; innerIndex++) {
+          //data, sedzia, miejsce
+          let randomMatchDate = moment()
+            .set({ minute: 0, second: 0, millisecond: 0 })
+            .subtract(randomIntFromMinMax(24, 24 * 60), "hour")
+            .toDate();
+          matchArray.push({
+            status: "Played",
+            matchDate: randomMatchDate,
+            homeTeamResult: randomIntFromMinMax(0, 10),
+            awayTeamResult: randomIntFromMinMax(0, 10),
+            homeTeam: teams[teamIndex],
+            awayTeam: teams[innerIndex],
+            league: leagues[leagueIndex],
+            referee: referees[randomIntFromMinMax(0, referees.length - 1)],
+            place: places[0]
+          });
+        }
+      }
+    }
+    await getConnection()
+      .createQueryBuilder()
+      .insert()
+      .into(Match)
+      .values(matchArray)
+      .execute();
   }
 
   async getSentMatchInvites(senderId: number) {

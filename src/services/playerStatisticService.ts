@@ -1,13 +1,25 @@
 import { PlayerStatistic } from "./../models/player/playerStatistic";
 import { getConnection } from "typeorm";
 import { Request, Response } from "express";
-import Player from "../models/player/player";
+import Player, { POSITION_OPTIONS } from "../models/player/player";
 import User from "../models/user";
 import PlayerService from "../services/playerService";
 import loadash from "lodash";
 import MatchService from "./matchService";
 import ExpectedError from "../utils/expectedError";
 import TeamService from "./teamService";
+import { randomIntFromMinMax } from "../utils/commonFunctions";
+import { Match } from "../models/match/match";
+
+interface statistics {
+  playerId: number;
+  goals: number;
+  assists: number;
+  yellowCards: number;
+  redCards: number;
+  matchId: number;
+  teamId: number;
+}
 
 class PlayerStatisticService {
   matchService = new MatchService();
@@ -33,6 +45,101 @@ class PlayerStatisticService {
     const playerStatistic = await playerStatisticRepository.create(req.body);
     await getConnection().manager.save(playerStatistic);
     // return playerStatistic;
+  }
+
+  async generateStatisticsForMatches() {
+    const allMatches = await getConnection()
+      .getRepository(Match)
+      .find({
+        where: { status: "Played" },
+        relations: ["homeTeam", "homeTeam.players", "awayTeam", "awayTeam.players"]
+      });
+    let allStats: statistics[] = [];
+    for (var index = 0; index < allMatches.length; index++) {
+      allStats = [
+        ...allStats,
+        ...this.generateStatisticsForPlayers(
+          allMatches[index].homeTeam.players,
+          allMatches[index].homeTeamResult,
+          allMatches[index].homeTeam.id,
+          allMatches[index].id
+        )
+      ];
+      allStats = [
+        ...allStats,
+        ...this.generateStatisticsForPlayers(
+          allMatches[index].awayTeam.players,
+          allMatches[index].awayTeamResult,
+          allMatches[index].awayTeam.id,
+          allMatches[index].id
+        )
+      ];
+    }
+    await getConnection()
+      .createQueryBuilder()
+      .insert()
+      .into(PlayerStatistic)
+      .values(allStats)
+      .execute();
+  }
+
+  generateStatisticsForPlayers(players: Player[], numberOfGoalsInMatch: number, teamId: number, matchId: number) {
+    let idsPlaying: statistics[] = [],
+      idsForChoosingGoals = [],
+      idsForChoosingAssists = [];
+    for (var playerIndex = 0; playerIndex < players.length; playerIndex++) {
+      if (randomIntFromMinMax(0, 3) != 0) {
+        let yellowCard = false,
+          redCard = false;
+        if (randomIntFromMinMax(1, 10) < 2) yellowCard = true;
+        if (randomIntFromMinMax(1, 100) < 2) redCard = true;
+        idsPlaying.push({
+          playerId: players[playerIndex].id,
+          goals: 0,
+          assists: 0,
+          yellowCards: yellowCard ? 1 : 0,
+          redCards: redCard ? 1 : 0,
+          teamId: teamId,
+          matchId: matchId
+        });
+        let chanceOfGettingGoal = 0;
+        let chanceOfGettingAssist = 0;
+        switch (players[playerIndex].position) {
+          case "Obrońca":
+            chanceOfGettingAssist = 1;
+            chanceOfGettingGoal = 1;
+            break;
+          case "Pomocnik":
+            chanceOfGettingAssist = 3;
+            chanceOfGettingGoal = 2;
+            break;
+          case "Napastnik":
+            chanceOfGettingAssist = 2;
+            chanceOfGettingGoal = 3;
+            break;
+          default:
+            chanceOfGettingAssist = 0;
+            chanceOfGettingGoal = 0;
+            break;
+        }
+        for (let i = 0; i < chanceOfGettingGoal; i++) {
+          idsForChoosingGoals.push(players[playerIndex].id);
+        }
+        for (let i = 0; i < chanceOfGettingAssist; i++) {
+          idsForChoosingAssists.push(players[playerIndex].id);
+        }
+      }
+    }
+    for (var goalIndex = 0; goalIndex < numberOfGoalsInMatch; goalIndex++) {
+      let idOfScorer = idsForChoosingGoals[randomIntFromMinMax(0, idsForChoosingGoals.length - 1)];
+      let idOfAssister = idsForChoosingAssists[randomIntFromMinMax(0, idsForChoosingAssists.length - 1)];
+      while (idOfScorer == idOfAssister) {
+        idOfAssister = idsForChoosingAssists[randomIntFromMinMax(0, idsForChoosingAssists.length - 1)];
+      }
+      idsPlaying.find(obj => obj.playerId === idOfScorer).goals++;
+      idsPlaying.find(obj => obj.playerId === idOfAssister).assists++;
+    }
+    return idsPlaying;
   }
 
   async getStatisticsForMatch(matchID: number) {

@@ -14,6 +14,13 @@ class PlacesService {
       .values(finalObject)
       .execute();
   }
+
+  async getPlaces() {
+    const places = await getConnection()
+      .getRepository(MatchPlace)
+      .find();
+    return places;
+  }
 }
 
 export default PlacesService;
