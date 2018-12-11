@@ -65,7 +65,7 @@ class MatchService {
             awayTeam: teams[innerIndex],
             league: leagues[leagueIndex],
             referee: referees[randomIntFromMinMax(0, referees.length - 1)],
-            place: places[0]
+            place: places[randomIntFromMinMax(0, places.length - 1)]
           });
         }
       }

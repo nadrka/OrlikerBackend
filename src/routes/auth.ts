@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 import PlayerService from "../services/playerService";
 import jwt from "jsonwebtoken";
 import config from "config";
-import TeamService from "services/teamService";
+import TeamService from "../services/teamService";
 const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
