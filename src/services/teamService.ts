@@ -10,22 +10,20 @@ import ExpectedError from "../utils/expectedError";
 import MatchService from "../services/matchService";
 class TeamService {
   async createTeam(req: Request) {
-    const { error } = Team.validateTeam(req.body);
-    if (error) throw new ExpectedError(error.details[0].message, 400);
-
     const teamRepository = await getConnection().getRepository(Team);
-    const teamFromRequestBody: DeepPartial<Team> = req.body;
-
+    const playerService = new PlayerService();
+    const leagueService = new LeagueService();
+    const player = await playerService.getPlayerWithGivenID(req.body.captainId);
     const teamWithName = await teamRepository.findOne({
-      name: teamFromRequestBody.name
+      name: req.body.name
     });
-
     if (teamWithName) throw new ExpectedError("Team with given name already exists!", 400);
 
-    const team = await teamRepository.create(teamFromRequestBody);
+    const league = await leagueService.getWeakestLeague();
+    const team = await teamRepository.create({ name: req.body.name, currentLegueId: league.id, captainId: player.id });
 
-    const playerService = new PlayerService();
-    const player = await playerService.getPlayerWithGivenID(req.body.captainId);
+    const { error } = Team.validateTeam(team);
+    if (error) throw new ExpectedError(error.details[0].message, 400);
 
     const savedTeam = await getConnection().manager.save(team);
 

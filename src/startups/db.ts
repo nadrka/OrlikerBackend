@@ -143,16 +143,16 @@ Andrzejewski
 Cieślak
 Głowacki`;
 
-const TEAM_NAMES = `Grom Kąkolewnica
-Tur Turze Rogi
-Tytan Wisznice
-Pławanice Kamień
-Ruch Ryki
-Grom Różaniec
-Wodnik Siemień
-Niwa Łomazy
-Absolwent Domaszewnica
-Leszkopol Bezek
+const TEAM_NAMES = `Apoel Morena
+Hanza Lider
+Ego Club Sopot
+KP Brzeźno
+Lechia Gdańsk
+AST Wrzeszcz
+KS Orunia
+Currenda Team
+Akademia Gepetto
+KP Sopot
 Prawda Prawda Stara
 Frassati Fajsławice
 Żyrzyniak Żyrzyn
@@ -217,7 +217,7 @@ Spartakus Szarowola`;
 const PLACES_NAMES = "SP76 Osowa Orunia Morena Oliwa Gedania Politechnika AWF Sahara Przejazdowo";
 
 const NUMBER_OF_LEAGUES = 3;
-const TEAMS_IN_LEAGUES = 18;
+const TEAMS_IN_LEAGUES = 10;
 export const PLAYERS_IN_TEAMS = 12;
 const nameArr = NAMES.split("\n");
 const surnamesArr = LASTNAMES.split("\n");
@@ -251,8 +251,6 @@ async function generateInitialData() {
   for (var initialIndex = 0; initialIndex < TEAMS_IN_LEAGUES * NUMBER_OF_LEAGUES; initialIndex++) {
     if (initialIndex == 0) {
       randomCredentials.push({ firstName: "Gustaw", secondName: "Ohler", login: "goodstuff", password: "12345" });
-    }
-    if (initialIndex == 1) {
       randomCredentials.push({ firstName: "Karol", secondName: "Nadratowski", login: "karol", password: "12345" });
     }
     let credentials = generateRandomCredentials(listOfLogins);

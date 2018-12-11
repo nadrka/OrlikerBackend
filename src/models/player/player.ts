@@ -4,6 +4,7 @@ import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, OneToMany
 import Joi from "joi";
 
 export const POSITION_OPTIONS = ["Bramkarz", "Obrońca", "Pomocnik", "Napastnik"];
+export const FOOT_OPTIONS = ["Prawa", "Lewa", "Obunożny"];
 
 @Entity()
 export class Player {
@@ -43,7 +44,7 @@ export class Player {
         .max(99)
         .required(),
       position: Joi.string().equal(POSITION_OPTIONS),
-      strongerFoot: Joi.string().equal(["Prawa", "Lewa", "Obunożny"])
+      strongerFoot: Joi.string().equal(FOOT_OPTIONS)
     };
 
     return Joi.validate(player, schema);

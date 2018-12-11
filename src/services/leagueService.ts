@@ -22,6 +22,11 @@ class LeagueService {
     return leagues;
   }
 
+  async getWeakestLeague() {
+    const leagues = await getConnection().manager.find(League, { order: { leagueNumber: "DESC" }, take: 1 });
+    return leagues[0];
+  }
+
   async getTeamsWithoutSort(leagueID: number) {
     const leaguesRepository = await getConnection().getRepository(League);
     const league = await leaguesRepository.findOne({ id: leagueID }, { relations: ["teams"] });
