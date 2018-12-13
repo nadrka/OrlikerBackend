@@ -145,8 +145,8 @@ class PlayerService {
     });
 
     return {
-      homeTeam: mappedAwayTeamPlayers,
-      awayTeam: mappedHomeTeamPlayers
+      homeTeam: mappedHomeTeamPlayers,
+      awayTeam: mappedAwayTeamPlayers
     };
   }
 
