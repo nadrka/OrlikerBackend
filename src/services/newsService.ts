@@ -3,9 +3,15 @@ import { News } from "../models/news";
 import { Team } from "../models/team/team";
 import { Response } from "express";
 import ExpectedError from "../utils/expectedError";
+import { Player } from "../models/player/player";
 
 class newsService {
-  async createNews(title: String, content: String, teamId: number) {
+  async createNews(title: String, content: String, senderId: number) {
+    const player = await getConnection()
+      .getRepository(Player)
+      .findOne(senderId, { relations: ["captainTeam"] });
+    let teamId = null;
+    if (player.captainTeam !== null) teamId = player.captainTeam.id;
     const newsRepository = await getConnection().getRepository(News);
     const news = newsRepository.create({ title: title, content: content, teamId: teamId });
     await getConnection().manager.save(news);

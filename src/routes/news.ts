@@ -1,13 +1,14 @@
 import express, { Request, Response } from "express";
 import NewsService from "../services/newsService";
 import ExpectedError from "../utils/expectedError";
+import auth from "../middlewares/auth";
 
 const router = express.Router();
 const newsService = new NewsService();
 
 //autoryzacja
-router.post("/", async (req: Request, res: Response) => {
-  const news = await newsService.createNews(req.body.title, req.body.content, req.body.teamId);
+router.post("/", auth, async (req: Request, res: Response) => {
+  const news = await newsService.createNews(req.body.title, req.body.content, res.locals.senderId);
   res.send(news);
 });
 router.get("/", async (req: Request, res: Response) => {
