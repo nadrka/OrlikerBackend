@@ -84,23 +84,6 @@ class PlayerService {
       relations: ["user"]
     });
 
-<<<<<<< HEAD
-    const mappedPlayers = Promise.all(
-      players.map(async player => {
-        const invitation = await invitationRepository.find({
-          playerId: player.id,
-          requestType: "team"
-        });
-        return {
-          id: player.id,
-          firstName: player.user.firstName,
-          secondName: player.user.secondName,
-          number: player.number,
-          isSent: invitation.length > 0 ? true : false
-        };
-      })
-    );
-=======
     const mappedPlayers = players.map(player => {
       return {
         id: player.id,
@@ -110,7 +93,6 @@ class PlayerService {
         imgURL: player.user.imgURL
       };
     });
->>>>>>> 3555e66ca38dac64ae94187a8251f452fe990edb
     return mappedPlayers;
   }
 
