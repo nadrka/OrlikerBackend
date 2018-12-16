@@ -9,6 +9,7 @@ const router = express.Router();
 const playerService = new PlayerService();
 
 import multer from "multer";
+import PlayerSeasonStatsService from "../services/playerSeasonStatsService";
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
     cb(null, "./uploads/");
@@ -50,6 +51,12 @@ router.get("/without/team", async (req: Request, res: Response) => {
 router.get("/:id", async (req: Request, res: Response) => {
   let player = await playerService.getPlayerWithGivenID(req.params.id);
   res.send(player);
+});
+
+router.get("/:id/historicStats", async (req: Request, res: Response) => {
+  let playerSeasonStatsService = new PlayerSeasonStatsService();
+  let stats = await playerSeasonStatsService.getStatsForPlayer(req.params.id);
+  res.send(stats);
 });
 
 //autoryzacja
