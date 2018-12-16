@@ -88,10 +88,14 @@ class MatchService {
     if (senderPlayer.captainTeam !== null) {
       const matches = await getConnection()
         .getRepository(Match)
-        .find({ where: { homeTeamId: senderPlayer.captainTeam.id, status: "ToAccept" }, relations: ["awayTeam"] });
+        .find({
+          where: { homeTeamId: senderPlayer.captainTeam.id, status: "ToAccept" },
+          relations: ["awayTeam", "place"]
+        });
       let toReturn = matches.map(value => {
+        console.log(value);
         return {
-          place: value.place,
+          place: value.place.place,
           id: value.id,
           date: value.matchDate,
           teamName: value.awayTeam.name,
@@ -111,10 +115,13 @@ class MatchService {
     if (senderPlayer.captainTeam !== null) {
       const matches = await getConnection()
         .getRepository(Match)
-        .find({ where: { awayTeamId: senderPlayer.captainTeam.id, status: "ToAccept" }, relations: ["homeTeam", "place"] });
+        .find({
+          where: { awayTeamId: senderPlayer.captainTeam.id, status: "ToAccept" },
+          relations: ["homeTeam", "place"]
+        });
       let toReturn = matches.map(value => {
         return {
-          place: value.place,
+          place: value.place.place,
           id: value.id,
           date: value.matchDate,
           teamName: value.homeTeam.name,
