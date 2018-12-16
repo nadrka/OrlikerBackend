@@ -284,6 +284,7 @@ async function generateInitialData() {
   await matchService.generateMatches();
   await teamService.updateTeams();
   await playerStatisticService.generateStatisticsForMatches();
+  await userService.generateAdmin("Jakub", "Szef");
   console.log("generowanie zajelo: " + moment().diff(time, "second") + " sekund");
 }
 

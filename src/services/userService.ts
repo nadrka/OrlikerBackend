@@ -56,6 +56,23 @@ class UserService {
     // return player;
   }
 
+  async generateAdmin(firstName: string, lastName: string) {
+    const userRepository = await getConnection().getRepository(User);
+
+    let user = await userRepository.create({
+      login: "admin",
+      password: "admin",
+      firstName: firstName,
+      secondName: lastName,
+      role: "Admin"
+    });
+
+    const salt = await bcrypt.genSalt(3);
+    user.password = await bcrypt.hash(user.password, salt);
+
+    await getConnection().manager.insert(User, user);
+  }
+
   async generateManyUsers(credentials: Array<credentialsObject>, referee: boolean) {
     var finalCredentialsObject: Array<credentialsObject> = [];
     for (var index = 0; index < credentials.length; index++) {

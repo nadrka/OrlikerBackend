@@ -42,7 +42,7 @@ export class User {
         .max(50)
         .required(),
       role: Joi.string()
-        .equal(["Referee", "Player", "Captain"])
+        .equal(["Referee", "Player", "Captain", "Admin"])
         .optional(),
       login: Joi.string()
         .min(3)
