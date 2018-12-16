@@ -111,7 +111,7 @@ class MatchService {
     if (senderPlayer.captainTeam !== null) {
       const matches = await getConnection()
         .getRepository(Match)
-        .find({ where: { awayTeamId: senderPlayer.captainTeam.id, status: "ToAccept" }, relations: ["homeTeam"] });
+        .find({ where: { awayTeamId: senderPlayer.captainTeam.id, status: "ToAccept" }, relations: ["homeTeam", "place"] });
       let toReturn = matches.map(value => {
         return {
           place: value.place,

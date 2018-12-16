@@ -1,6 +1,6 @@
 import { getConnection } from "typeorm";
 import { Request, Response } from "express";
-import Player, { POSITION_OPTIONS } from "../models/player/player";
+import Player, { POSITION_OPTIONS, FOOT_OPTIONS } from "../models/player/player";
 import User from "../models/user";
 import * as loadash from "lodash";
 import ExpectedError from "../utils/expectedError";
@@ -46,13 +46,19 @@ class PlayerService {
             user: users[index],
             team: teamIndex < teams.length ? teams[teamIndex] : null,
             position: innerIndex == 0 ? POSITION_OPTIONS[0] : POSITION_OPTIONS[randomIntFromMinMax(1, 3)],
-            number: randomIntFromMinMax(1, 99)
+            number: randomIntFromMinMax(1, 99),
+            strongerFoot: FOOT_OPTIONS[randomIntFromMinMax(0, 2)]
           });
         teamIndex++;
       }
     } else {
       for (var index = 0; index < users.length; index++) {
-        objectToInsert.push({ user: users[index], position: POSITION_OPTIONS[randomIntFromMinMax(0, 3)] });
+        objectToInsert.push({
+          user: users[index],
+          position: POSITION_OPTIONS[randomIntFromMinMax(0, 3)],
+          number: randomIntFromMinMax(1, 99),
+          strongerFoot: FOOT_OPTIONS[randomIntFromMinMax(0, 2)]
+        });
       }
     }
     await getConnection()
@@ -78,6 +84,7 @@ class PlayerService {
       relations: ["user"]
     });
 
+<<<<<<< HEAD
     const mappedPlayers = Promise.all(
       players.map(async player => {
         const invitation = await invitationRepository.find({
@@ -93,6 +100,17 @@ class PlayerService {
         };
       })
     );
+=======
+    const mappedPlayers = players.map(player => {
+      return {
+        id: player.id,
+        firstName: player.user.firstName,
+        secondName: player.user.secondName,
+        number: player.number,
+        imgURL: player.user.imgURL
+      };
+    });
+>>>>>>> 3555e66ca38dac64ae94187a8251f452fe990edb
     return mappedPlayers;
   }
 
@@ -154,7 +172,7 @@ class PlayerService {
 
   async getPlayerForUser(userID: number) {
     const playerRepository = await getConnection().getRepository(Player);
-    const player = await playerRepository.findOne({ user: { id: userID } });
+    const player = await playerRepository.findOne({ user: { id: userID } }, { relations: ["captainTeam"] });
 
     return player;
   }

@@ -27,8 +27,6 @@ router.post("/", async (req: Request, res: Response) => {
 
   const playerService = new PlayerService();
   const player = await playerService.getPlayerForUser(existingUser.id);
-  const teamService = new TeamService();
-  const team = await teamService.getTeamForGivenId(player.teamId);
   let data = {
     token: token,
     id: existingUser.id,
@@ -36,12 +34,22 @@ router.post("/", async (req: Request, res: Response) => {
     secondName: existingUser.secondName,
     role: existingUser.role
   };
+<<<<<<< HEAD
 
   if (player)
     Object.assign(data, player, {
       isCaptain: team != null,
       teamName: team ? team.name : ""
+=======
+  if (player) {
+    const teamService = new TeamService();
+    const team = await teamService.getTeamForGivenId(player.teamId);
+    Object.assign(data, player, {
+      isCaptain: player.captainTeam !== null,
+      teamName: team ? team.name : null
+>>>>>>> 3555e66ca38dac64ae94187a8251f452fe990edb
     });
+  }
   res.send(data);
 });
 
