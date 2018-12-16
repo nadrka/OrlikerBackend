@@ -49,10 +49,10 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/id:", async (req: Request, res: Response) => {
+/* router.get("/id:", async (req: Request, res: Response) => {
   const teams = await teamService.getAllTeams();
   res.send(teams);
-});
+}); */
 
 router.get("/:id", async (req: Request, res: Response) => {
   const team = await teamService.getTeam(req.params.id);

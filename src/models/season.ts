@@ -12,6 +12,12 @@ export class Season {
   @Column()
   public endDate: Date;
 
+  @Column()
+  public name: string;
+
+  @Column()
+  public isActive: boolean;
+
   @OneToMany(type => League, league => league.season)
   leagues: League[];
 }

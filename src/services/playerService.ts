@@ -69,7 +69,7 @@ class PlayerService {
       .execute();
   }
 
-  async getAllPlayers(req: Request) {
+  async getAllPlayers() {
     const players = await getConnection().manager.find(Player, {
       relations: ["user"]
     });

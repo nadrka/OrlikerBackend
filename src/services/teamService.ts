@@ -124,7 +124,7 @@ class TeamService {
     return teams;
   }
 
-  async getAllTeams() {
+  /* async getAllTeams() {
     const teamRepository = await getConnection().getRepository(Team);
     const teams = await teamRepository.find();
 
@@ -136,6 +136,12 @@ class TeamService {
       }));
 
     return playerTeamStatistics;
+  } */
+
+  async getAllTeams() {
+    const teamRepository = getConnection().getRepository(Team);
+    const teams = await teamRepository.find();
+    return teams;
   }
 
   async getTeam(teamID: number) {

@@ -9,6 +9,8 @@ import PlacesService from "../services/placesService";
 import MatchService from "../services/matchService";
 import { randomIntFromMinMax } from "../utils/commonFunctions";
 import PlayerStatisticService from "../services/playerStatisticService";
+import SeasonService from "../services/seasonService";
+import PlayerSeasonStatsService from "../services/playerSeasonStatsService";
 
 const NAMES = `Jan
 Andrzej
@@ -217,7 +219,7 @@ Spartakus Szarowola`;
 const PLACES_NAMES = "SP76 Osowa Orunia Morena Oliwa Gedania Politechnika AWF Sahara Przejazdowo";
 
 const NUMBER_OF_LEAGUES = 3;
-const TEAMS_IN_LEAGUES = 10;
+export const TEAMS_IN_LEAGUES = 10;
 export const PLAYERS_IN_TEAMS = 12;
 const nameArr = NAMES.split("\n");
 const surnamesArr = LASTNAMES.split("\n");
@@ -225,6 +227,7 @@ const teamNameArr = TEAM_NAMES.split("\n");
 const placesNamesArr = PLACES_NAMES.split(" ");
 const NUMBER_OF_REFEREES = 15;
 const NUMBER_OF_PLACES = 10;
+const SEASONS = 3;
 
 function generateRandomCredentials(alreadyChosenArr: Array<string>) {
   let randomName = nameArr[randomIntFromMinMax(0, nameArr.length - 1)];
@@ -244,10 +247,13 @@ async function generateInitialData() {
   const userService = new UserService();
   const matchService = new MatchService();
   const placesService = new PlacesService();
+  const seasonService = new SeasonService();
+  const playerSeasonStatsService = new PlayerSeasonStatsService();
   const playerStatisticService = new PlayerStatisticService();
   var listOfLogins: Array<string> = [];
   let time = moment();
   var randomCredentials = [];
+  //create captains
   for (var initialIndex = 0; initialIndex < TEAMS_IN_LEAGUES * NUMBER_OF_LEAGUES; initialIndex++) {
     if (initialIndex == 0) {
       randomCredentials.push({ firstName: "Gustaw", secondName: "Ohler", login: "goodstuff", password: "12345" });
@@ -258,12 +264,16 @@ async function generateInitialData() {
     randomCredentials.push(credentials);
   }
   await userService.generateManyUsers(randomCredentials, false);
+  //create season
+  await seasonService.generateSeason("Jesień-Zima 2018", moment().subtract(61, "days"), moment().add(15, "day"));
+  //create leagues
   for (var mainIndex = 0; mainIndex < NUMBER_OF_LEAGUES; mainIndex++) {
     let league = await leagueService.createLeague();
     for (var teamIndex = 0; teamIndex < TEAMS_IN_LEAGUES; teamIndex++) {
       await teamService.createTeamWithoutToken(teamNameArr[mainIndex * TEAMS_IN_LEAGUES + teamIndex], league.id);
     }
   }
+  //create normal players
   let usersNotCaptainsCredentials = [];
   for (var userIndex = 0; userIndex < TEAMS_IN_LEAGUES * NUMBER_OF_LEAGUES * PLAYERS_IN_TEAMS; userIndex++) {
     let credentials = generateRandomCredentials(listOfLogins);
@@ -272,7 +282,9 @@ async function generateInitialData() {
     usersNotCaptainsCredentials.push(credentials);
   }
   await userService.generateManyUsers(usersNotCaptainsCredentials, false);
+  //create places
   await placesService.saveMultiplePlaces(placesNamesArr, NUMBER_OF_PLACES);
+  //create referees
   let referees = [];
   for (var refereeIndex = 0; refereeIndex < NUMBER_OF_REFEREES; refereeIndex++) {
     let credentials = generateRandomCredentials(listOfLogins);
@@ -281,10 +293,26 @@ async function generateInitialData() {
     referees.push(credentials);
   }
   await userService.generateManyUsers(referees, true);
+  //create matches and stats
   await matchService.generateMatches();
   await teamService.updateTeams();
   await playerStatisticService.generateStatisticsForMatches();
+  //create admin
   await userService.generateAdmin("Jakub", "Szef");
+  //create historic seasons
+  const season1 = await seasonService.generateSeason(
+    "Lato 2018",
+    moment("01-06-2018", "DD-MM-YYYY"),
+    moment("01-09-2018", "DD-MM-YYYY")
+  );
+  await leagueService.generateLeaguesForSeason(NUMBER_OF_LEAGUES, season1);
+  const season2 = await seasonService.generateSeason(
+    "Wiosna 2018",
+    moment("01-03-2018", "DD-MM-YYYY"),
+    moment("31-05-2018", "DD-MM-YYYY")
+  );
+  await leagueService.generateLeaguesForSeason(NUMBER_OF_LEAGUES, season2);
+  await playerSeasonStatsService.generatePastStats();
   console.log("generowanie zajelo: " + moment().diff(time, "second") + " sekund");
 }
 

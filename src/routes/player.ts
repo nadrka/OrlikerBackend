@@ -38,7 +38,7 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 router.get("/", async (req: Request, res: Response) => {
-  const players = await playerService.getAllPlayers(req);
+  const players = await playerService.getAllPlayers();
   res.send(players);
 });
 

@@ -1,13 +1,9 @@
 import Joi from "joi";
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn
-} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne } from "typeorm";
 import Player from "./player";
 import Team from "../team/team";
+import { League } from "../league";
+import { Season } from "../season";
 
 @Entity()
 export class PlayerSeasonStatistic {
@@ -30,22 +26,23 @@ export class PlayerSeasonStatistic {
   redCards: number;
 
   @Column()
-  leagueNumber: number;
+  seasonId: number;
 
-  @Column()
-  season: string;
+  @ManyToOne(type => Season)
+  @JoinColumn({ name: "seasonId" })
+  season: Season;
 
   @Column()
   playerId: number;
 
-  @OneToOne(type => Player)
+  @ManyToOne(type => Player)
   @JoinColumn({ name: "playerId" })
-  captain: Player;
+  player: Player;
 
   @Column()
   public teamId: number;
 
-  @OneToOne(type => Team, { nullable: true })
+  @ManyToOne(type => Team, { nullable: true })
   @JoinColumn({ name: "teamId" })
   team: Team;
 
