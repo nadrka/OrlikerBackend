@@ -1,11 +1,12 @@
 import { Invitation } from "./../models/invitation";
 import { getConnection } from "typeorm";
 import { Request, Response } from "express";
-import * as loadash from "lodash";
 import { League } from "../models/league";
 import PlayerService from "./playerService";
 import TeamService from "./teamService";
 import ExpectedError from "../utils/expectedError";
+import Team from "../models/team/team";
+import loadash from "lodash";
 
 class InvitationService {
   playerService = new PlayerService();
@@ -136,6 +137,36 @@ class InvitationService {
     const invitations = await invitationReposistory.find();
 
     return invitations;
+  }
+
+  async getAllRequestsWithStatusForPlayer(playerId: number) {
+    const invitationReposistory = await getConnection().getRepository(Invitation);
+    const teamRepository = await getConnection().getRepository(Team);
+    const teams = await teamRepository.find();
+    const mappedTeam = await Promise.all(
+      teams.map(async team => {
+        const invitations = await invitationReposistory.find({
+          teamId: team.id,
+          playerId: playerId
+        });
+        console.log(invitations);
+        return {
+          id: team.id,
+          name: team.name,
+          currentLegueId: team.currentLegueId,
+          imgURL: team.imgURL,
+          isSent: invitations.length > 0 ? true : false
+        };
+      })
+    );
+    var playerTeamStatistics = loadash(teams)
+      .groupBy(t => t.currentLegueId)
+      .map((teams, id) => ({
+        league: +id,
+        teams: mappedTeam
+      }));
+
+    return playerTeamStatistics;
   }
 }
 

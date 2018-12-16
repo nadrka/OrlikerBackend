@@ -98,4 +98,11 @@ router.get("/:id/statistics", async (req: Request, res: Response) => {
   res.send(statistics);
 });
 
+router.get("/:id/team/requests", async (req: Request, res: Response) => {
+  const invitationService = new InvitationService();
+  const teamsWithStatus = await invitationService.getAllRequestsWithStatusForPlayer(req.params.id);
+  console.log(teamsWithStatus);
+  res.send(teamsWithStatus);
+});
+
 export default router;

@@ -8,6 +8,7 @@ import Match from "../models/match/match";
 import { Team } from "../models/team/team";
 import { PLAYERS_IN_TEAMS } from "../startups/db";
 import { randomIntFromMinMax } from "../utils/commonFunctions";
+import Invitation from "../models/invitation";
 
 class PlayerService {
   async createPlayer(req: Request) {
@@ -71,19 +72,27 @@ class PlayerService {
 
   async getAllPlayersWithoutTeam() {
     const playersRepository = await getConnection().getRepository(Player);
+    const invitationRepository = await getConnection().getRepository(Invitation);
     const players = await playersRepository.find({
       where: { teamId: null },
       relations: ["user"]
     });
 
-    const mappedPlayers = players.map(player => {
-      return {
-        id: player.id,
-        firstName: player.user.firstName,
-        secondName: player.user.secondName,
-        number: player.number
-      };
-    });
+    const mappedPlayers = Promise.all(
+      players.map(async player => {
+        const invitation = await invitationRepository.find({
+          playerId: player.id,
+          requestType: "team"
+        });
+        return {
+          id: player.id,
+          firstName: player.user.firstName,
+          secondName: player.user.secondName,
+          number: player.number,
+          isSent: invitation.length > 0 ? true : false
+        };
+      })
+    );
     return mappedPlayers;
   }
 
@@ -138,8 +147,8 @@ class PlayerService {
     });
 
     return {
-      homeTeam: mappedAwayTeamPlayers,
-      awayTeam: mappedHomeTeamPlayers
+      homeTeam: mappedHomeTeamPlayers,
+      awayTeam: mappedAwayTeamPlayers
     };
   }
 

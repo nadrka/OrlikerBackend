@@ -36,10 +36,11 @@ router.post("/", async (req: Request, res: Response) => {
     secondName: existingUser.secondName,
     role: existingUser.role
   };
+
   if (player)
     Object.assign(data, player, {
-      isCaptain: player.captainTeam !== null,
-      teamName: team.name
+      isCaptain: team != null,
+      teamName: team ? team.name : ""
     });
   res.send(data);
 });

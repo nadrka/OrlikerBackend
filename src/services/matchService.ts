@@ -20,13 +20,16 @@ class MatchService {
     //   .findOne({ captainId: req.body.captainId });
     // if (!senderTeam)
     //   throw new ExpectedError("User is not captain of any team", 400);
+    const homeTeam = await getConnection()
+      .getRepository(Team)
+      .findOne({ captainId: req.body.homeTeamId });
     let matchData = {
       status: "ToAccept",
       homeTeamId: req.body.homeTeamId,
       awayTeamId: req.body.awayTeamId,
       matchDate: req.body.matchDate,
       placeId: req.body.placeId,
-      leagueId: req.body.leagueId,
+      leagueId: homeTeam.currentLegueId,
       refereeId: req.body.refereeId
     };
     console.log(matchData);
