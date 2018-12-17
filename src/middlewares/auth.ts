@@ -9,6 +9,7 @@ function auth(req: Request, res: Response, next: NextFunction) {
   try {
     let decoded: any = jwt.verify(token, config.get("jwtPrivateKey"));
     res.locals.senderId = decoded.id;
+    res.locals.senderRole = decoded.role;
     next();
   } catch (exepction) {
     res.sendStatus(403);

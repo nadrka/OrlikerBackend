@@ -27,7 +27,7 @@ export class User {
   public imgURL: string = "uploads/user-image-placeholder.jpg";
 
   generateAuthToken = function() {
-    const token = jwt.sign({ id: this.id }, Config.get("jwtPrivateKey"));
+    const token = jwt.sign({ id: this.id, role: this.role }, Config.get("jwtPrivateKey"));
     return token;
   };
 

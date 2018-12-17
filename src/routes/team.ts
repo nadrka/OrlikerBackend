@@ -8,6 +8,8 @@ import moment from "moment";
 import ExpectedError from "../utils/expectedError";
 import auth from "../middlewares/auth";
 import InvitationService from "../services/invitationService";
+import multer from "multer";
+import newsService from "../services/newsService";
 
 const router = express.Router();
 const teamService = new TeamService();
@@ -15,7 +17,8 @@ const matchService = new MatchService();
 const playerService = new PlayerService();
 const playerStatisticsService = new PlayerStatisticService();
 const invitationService = new InvitationService();
-import multer from "multer";
+const newsService1 = new newsService();
+
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
     cb(null, "./uploads/");
@@ -93,6 +96,11 @@ router.get("/:id/matches/played", async (req: Request, res: Response) => {
 router.get("/:id/statistics", async (req: Request, res: Response) => {
   const statistics = await playerStatisticsService.getStatisticsForTeam(req.params.id);
   res.send(statistics);
+});
+
+router.get("/:id/news", async (req: Request, res: Response) => {
+  const news = await newsService1.getNewsForTeam(req.params.id);
+  res.send(news);
 });
 
 //autoryzacja

@@ -8,7 +8,12 @@ const newsService = new NewsService();
 
 //autoryzacja
 router.post("/", auth, async (req: Request, res: Response) => {
-  const news = await newsService.createNews(req.body.title, req.body.content, res.locals.senderId);
+  const news = await newsService.createNews(
+    req.body.title,
+    req.body.content,
+    res.locals.senderId,
+    res.locals.senderRole
+  );
   res.send(news);
 });
 router.get("/", async (req: Request, res: Response) => {

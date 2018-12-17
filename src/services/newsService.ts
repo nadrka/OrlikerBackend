@@ -6,12 +6,14 @@ import ExpectedError from "../utils/expectedError";
 import { Player } from "../models/player/player";
 
 class newsService {
-  async createNews(title: String, content: String, senderId: number) {
-    const player = await getConnection()
-      .getRepository(Player)
-      .findOne(senderId, { relations: ["captainTeam"] });
+  async createNews(title: String, content: String, senderId: number, role: string) {
     let teamId = null;
-    if (player.captainTeam !== null) teamId = player.captainTeam.id;
+    if (role === "Player") {
+      const player = await getConnection()
+        .getRepository(Player)
+        .findOne(senderId, { relations: ["captainTeam"] });
+      if (player.captainTeam !== null) teamId = player.captainTeam.id;
+    }
     const newsRepository = await getConnection().getRepository(News);
     const news = newsRepository.create({ title: title, content: content, teamId: teamId });
     await getConnection().manager.save(news);
