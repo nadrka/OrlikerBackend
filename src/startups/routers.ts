@@ -11,6 +11,7 @@ import referees from "../routes/referee";
 import places from "../routes/places";
 import League from "../routes/league";
 import news from "../routes/news";
+import season from "../routes/season";
 
 function addRouters(app: Express) {
   app.use(express.json());
@@ -25,6 +26,7 @@ function addRouters(app: Express) {
   app.use("/api/teams", team);
   app.use("/api/users", user);
   app.use("/api/news", news);
+  app.use("/api/seasons", season);
 }
 
 export default addRouters;
